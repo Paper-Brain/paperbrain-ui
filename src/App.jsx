@@ -9,7 +9,7 @@ import SolutionsPage from "./components/features/SolutionsPage";
 import EnterprisePage from "./components/features/EnterprisePage";
 import LearnMorePage from "./components/features/LearnMorePage";
 import Pricing from "./components/features/PricingPage";
-
+import AuthCallback from "./components/auth/AuthCallback";
 import LandingPage from "./components/home/LandingPage";
 import Layout from "./components/layout/Layout";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -53,7 +53,7 @@ function App() {
           <Route path="/verify-account" element={<VerifyAccount />} />
           <Route path="/account-setting" element={<AccountSettings />} />
           <Route path="/user-profile" element={<UserProfile />} />
-
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/login-otp" element={<LoginOTP />} />

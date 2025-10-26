@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { ArrowUpRight, Eye, EyeOff, Github, Gitlab, GitBranch, GitBranchPlus } from "lucide-react";
+import {
+  ArrowUpRight,
+  Eye,
+  EyeOff,
+  Github,
+  Gitlab,
+  GitBranch,
+  GitBranchPlus,
+} from "lucide-react";
+import axios from "axios";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +27,7 @@ const Login = () => {
     }));
   };
 
-   const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
@@ -27,15 +36,45 @@ const Login = () => {
     }, 1000);
   };
 
-  const handleOAuthLogin = (provider) => {
-    alert(`Login with ${provider}`);
+   const handleOAuthLogin = async (provider) => {
+    // *** THIS IS THE FIX ***
+    if (provider === "GitHub") {
+      try {
+        // Call the backend to generate oauth_state and get authorization URL
+        const response = await axios.get('https://localhost:8000/api/v1/auth/github/login', { withCredentials: true});
+
+        // Redirect to GitHub OAuth with the generated URL
+        window.location.href = response.data.authorization_url;
+      } catch (error) {
+        console.error("Error during GitHub OAuth login:", error);
+      }
+    } else {
+      // Other providers can be handled here
+      alert(`Login with ${provider}`);
+    }
   };
 
   const oauthProviders = [
-    { name: "Azure", color: "from-blue-500 to-blue-600", icon: <GitBranchPlus className="w-5 h-5" /> },
-    { name: "GitHub", color: "from-gray-700 to-gray-800", icon: <Github className="w-5 h-5" /> },
-    { name: "Bitbucket", color: "from-blue-600 to-blue-700", icon: <GitBranch className="w-5 h-5"/> },
-    { name: "GitLab", color: "from-orange-500 to-orange-600", icon: <Gitlab className="w-5 h-5"/> },
+    {
+      name: "Azure",
+      color: "from-blue-500 to-blue-600",
+      icon: <GitBranchPlus className="w-5 h-5" />,
+    },
+    {
+      name: "GitHub",
+      color: "from-gray-700 to-gray-800",
+      icon: <Github className="w-5 h-5" />,
+    },
+    {
+      name: "Bitbucket",
+      color: "from-blue-600 to-blue-700",
+      icon: <GitBranch className="w-5 h-5" />,
+    },
+    {
+      name: "GitLab",
+      color: "from-orange-500 to-orange-600",
+      icon: <Gitlab className="w-5 h-5" />,
+    },
   ];
 
   return (
@@ -51,7 +90,9 @@ const Login = () => {
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Left Side - Email Login */}
           <div className="flex-1">
-            <h3 className="text-xl font-light mb-6 text-center lg:text-left">Login with Email</h3>
+            <h3 className="text-xl font-light mb-6 text-center lg:text-left">
+              Login with Email
+            </h3>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="relative">
                 <input
@@ -127,7 +168,9 @@ const Login = () => {
 
           {/* Right Side - OAuth Providers */}
           <div className="flex-1">
-            <h3 className="text-xl font-light mb-6 text-center lg:text-left">Quick Login</h3>
+            <h3 className="text-xl font-light mb-6 text-center lg:text-left">
+              Quick Login
+            </h3>
             <div className="space-y-4">
               {oauthProviders.map((provider) => (
                 <button
