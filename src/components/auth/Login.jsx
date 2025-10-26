@@ -1,14 +1,6 @@
 import React, { useState } from "react";
-import {
-  ArrowUpRight,
-  Eye,
-  EyeOff,
-  Github,
-  Gitlab,
-  GitBranch,
-  GitBranchPlus,
-} from "lucide-react";
-import axios from "axios";
+import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
+import { FaGithub, FaBitbucket, FaMicrosoft, FaGitlab } from "react-icons/fa";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -58,22 +50,22 @@ const Login = () => {
     {
       name: "Azure",
       color: "from-blue-500 to-blue-600",
-      icon: <GitBranchPlus className="w-5 h-5" />,
+      icon: <FaMicrosoft className="w-5 h-5" />,
     },
     {
       name: "GitHub",
       color: "from-gray-700 to-gray-800",
-      icon: <Github className="w-5 h-5" />,
+      icon: <FaGithub className="w-5 h-5" />,
     },
     {
       name: "Bitbucket",
       color: "from-blue-600 to-blue-700",
-      icon: <GitBranch className="w-5 h-5" />,
+      icon: <FaBitbucket className="w-5 h-5" />,
     },
     {
       name: "GitLab",
       color: "from-orange-500 to-orange-600",
-      icon: <Gitlab className="w-5 h-5" />,
+      icon: <FaGitlab className="w-5 h-5" />,
     },
   ];
 
@@ -137,7 +129,10 @@ const Login = () => {
                   </a>
                 </p>
               </div>
-              <button className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300">
+              <button
+                type="submit"
+                className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+              >
                 LOGIN
                 <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
               </button>
@@ -156,39 +151,42 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Mobile Divider */}
+          {/* Divider */}
           <div className="lg:hidden flex items-center gap-4">
             <div className="flex-1 h-px bg-white/10"></div>
             <span className="text-sm text-gray-400 font-extralight">or</span>
             <div className="flex-1 h-px bg-white/10"></div>
           </div>
-
-          {/* Desktop Divider */}
           <div className="hidden lg:block w-px bg-white/10"></div>
 
+
           {/* Right Side - OAuth Providers */}
-          <div className="flex-1">
-            <h3 className="text-xl font-light mb-6 text-center lg:text-left">
-              Quick Login
-            </h3>
-            <div className="space-y-4">
+          <div className="flex-1 flex flex-col items-center">
+            <h3 className="text-xl font-light mb-6 text-center">Quick Login</h3>
+
+            <div className="space-y-4 w-full max-w-sm">
               {oauthProviders.map((provider) => (
                 <button
                   key={provider.name}
                   onClick={() => handleOAuthLogin(provider.name)}
-                  className={`group w-full px-6 py-4 bg-gradient-to-r ${provider.color} border border-white/10 text-white text-sm tracking-wider transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3`}
+                  className={`group w-full px-6 py-4 rounded-md bg-gradient-to-r ${provider.color} border border-white/10 text-white text-sm tracking-wider transition-all duration-300 hover:scale-[1.02] flex items-center justify-between`}
                 >
-                  {typeof provider.icon === "string" ? (
-                    <span className="text-lg font-bold">{provider.icon}</span>
-                  ) : (
-                    provider.icon
-                  )}
-                  <span>Continue with {provider.name}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center justify-center w-5 h-5">
+                      {provider.name === "Bitbucket" ? (
+                        <span className="translate-y-[1px] scale-110">{provider.icon}</span>
+                      ) : (
+                        provider.icon
+                      )}
+                    </span>
+                    <span>Continue with {provider.name}</span>
+                  </div>
                   <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
                 </button>
               ))}
             </div>
           </div>
+
         </div>
       </div>
     </div>
