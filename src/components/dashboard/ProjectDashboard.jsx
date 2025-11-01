@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronRight,
   Plus,
@@ -15,16 +15,41 @@ import {
   Search,
   Bell, 
   Settings as SettingsIcon, 
-  AlignLeft,
-  
+  AlignLeft,  
   X,
 } from "lucide-react";
+import { useGetMeQuery } from '../../api/authApi.js';
+import UserDropdown from '../auth/UserDropdown.jsx';
+import UserAvatar from '../auth/Avatar.jsx'; 
 
 const ProjectDashboard = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("Overview");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const { data: user, isSuccess, isLoading } = useGetMeQuery();
+  const isAuthenticated = isSuccess && !!user;
+
+  useEffect(() => {
+      const handleScroll = () => {
+        setScrolled(window.scrollY > 20);
+      };
+  
+      // The mouse move listener is not directly used for the navbar functionality
+      // but is kept for consistency with your original code.
+      const handleMouseMove = (e) => {
+        // Original logic for mouse position, kept for continuity
+      };
+  
+      window.addEventListener("scroll", handleScroll);
+      window.addEventListener("mousemove", handleMouseMove);
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+        window.removeEventListener("mousemove", handleMouseMove);
+      };
+    }, []);
+  
   const navigation = [
     { id: "overview", label: "Overview", icon: Layout },
     { id: "summary", label: "Summary", icon: FileText },
@@ -130,8 +155,16 @@ const ProjectDashboard = () => {
               <div className="flex items-center gap-4">
                 <Bell className="w-5 h-5 text-violet-400" />
                 <SettingsIcon className="w-5 h-5 text-violet-400" />
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-yellow-300 rounded-full flex items-center justify-center text-blue-800">
-                  DF
+                <div 
+                  className="relative flex items-center justify-center"
+                  onMouseEnter={() => setIsDropdownOpen(true)}
+                  onMouseLeave={() => setIsDropdownOpen(false)}
+                >
+                  <UserAvatar 
+                    user={user} 
+                    sizeClass="w-10 h-10 cursor-pointer " 
+                  />
+                  {isDropdownOpen && <UserDropdown/>}
                 </div>
               </div>
             </div>

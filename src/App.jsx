@@ -24,6 +24,7 @@ import ProjectDashboard from "./components/dashboard/ProjectDashboard";
 import OrgDashboard from "./components/dashboard/OrgDashboard";
 import UnitTestSummary from "./components/unit-test/UnitTestSummary";
 import UnitTestGenerator from "./components/unit-test/UnitTestGenerator";
+import UserDropdown from "./components/auth/UserDropdown";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-account" element={<VerifyAccount />} />
           <Route path="/account-setting" element={<AccountSettings />} />
+          <Route path="/account" element={<UserDropdown />} />
           <Route path="/user-profile" element={<UserProfile />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
 import { FaGithub, FaBitbucket, FaMicrosoft, FaGitlab } from "react-icons/fa";
+import axios from "axios";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -70,13 +71,13 @@ const Login = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center p-4">
+    <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center ">
       <div className="w-full max-w-5xl px-6 py-12 border border-white/10 backdrop-blur-md rounded-lg">
         <h2 className="text-3xl font-thin tracking-wide mb-8 text-center">
           Welcome Back
-          <span className="block mt-2 text-violet-400 text-lg font-light">
+          {/* <span className="block mt-2 text-violet-400 text-lg font-light">
             Log in to your account
-          </span>
+          </span> */}
         </h2>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
