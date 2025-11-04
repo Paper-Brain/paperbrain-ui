@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { EllipsisVertical, Loader, X } from "lucide-react";
-// import Loader from "../../util/Loader.jsx";
+import { useNavigate } from "react-router-dom";
 import { useGetMeQuery } from '../../api/authApi.js'; 
 import UserDropdown from '../auth/UserDropdown.jsx'; 
 import UserAvatar from '../auth/Avatar.jsx'; 
@@ -9,7 +9,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
-
+  const navigate = useNavigate();
   // 3. Fetch user data from the global RTK cache
   const { data: user, isSuccess, isLoading } = useGetMeQuery();
   const isAuthenticated = isSuccess && !!user; 
@@ -137,7 +137,7 @@ const Navbar = () => {
               {!isAuthenticated && (
                 <button
                   onClick={() => {
-                    handleGetAccess();
+                    handleGetAccess;
                     setIsMenuOpen(false);
                   }}
                   className="w-full relative px-8 py-3 mt-4 overflow-hidden group bg-transparent text-left"
