@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
-import { AlignLeft , X, RefreshCw, Moon, Sun } from "lucide-react";
+import { AlignLeft, X, RefreshCw, Moon, Sun } from "lucide-react";
+import UserAvatar from "../auth/Avatar";
+import UserDropdown from "../auth/UserDropdown.jsx";
+import { useGetMeQuery } from "../../api/authApi.js";
 
 const initialWidgets = [
   {
@@ -50,6 +53,30 @@ const OrgDashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [widgets, setWidgets] = useState(initialWidgets);
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const { data: user, isSuccess, isLoading } = useGetMeQuery();
+  const isAuthenticated = isSuccess && !!user;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    // The mouse move listener is not directly used for the navbar functionality
+    // but is kept for consistency with your original code.
+    const handleMouseMove = (e) => {
+      // Original logic for mouse position, kept for continuity
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   const handleMove = (fromId, toId) => {
     const fromIndex = widgets.findIndex((w) => w.id === fromId);
     const toIndex = widgets.findIndex((w) => w.id === toId);
@@ -75,20 +102,25 @@ const OrgDashboard = () => {
           </button>
           {/* <h1 className="text-xl font-thin">Project Dashboard</h1> */}
           <div className="flex items-center">
-              <a href="/">
-                <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
-                  PaperBrain<span className="text-violet-400">°</span>
-                </span>
-              </a>
-            </div>
+            <a href="/">
+              <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
+                PaperBrain<span className="text-violet-400">°</span>
+              </span>
+            </a>
+          </div>
         </div>
         <div className="flex gap-2">
           <button className="p-2 border border-white/10 hover:bg-white/5 transition-colors">
             <Moon className="w-5 h-5 text-violet-400" />
           </button>
-          <button className="p-2 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800">
-            <RefreshCw className="w-5 h-5" />
-          </button>
+          <div
+            className="relative flex items-center justify-center"
+            onMouseEnter={() => setIsDropdownOpen(true)}
+            onMouseLeave={() => setIsDropdownOpen(false)}
+          >
+            <UserAvatar user={user} sizeClass="w-10 h-10 cursor-pointer " />
+            {isDropdownOpen && <UserDropdown />}
+          </div>
         </div>
       </header>
 
@@ -156,8 +188,8 @@ const OrgDashboard = () => {
                             color: "#fff",
                             font: {
                               family: "system-ui",
-                              weight: "300"
-                            }
+                              weight: "300",
+                            },
                           },
                         },
                       },
@@ -194,7 +226,9 @@ const OrgDashboard = () => {
                         className="p-2 border border-white/10 rounded flex justify-between items-center hover:bg-white/5 transition-colors"
                       >
                         <span className="font-extralight">{item.title}</span>
-                        <span className={`${item.color} text-sm font-extralight`}>
+                        <span
+                          className={`${item.color} text-sm font-extralight`}
+                        >
                           {item.status}
                         </span>
                       </li>

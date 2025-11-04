@@ -59,6 +59,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/login-otp" element={<LoginOTP />} />
+          <Route path="*" element={<div>404 Page Not Found</div>} />
         </Routes>
       </Router>
       {/* <LandingPage/>
