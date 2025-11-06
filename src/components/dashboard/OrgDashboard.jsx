@@ -1,24 +1,23 @@
 import { useState, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS } from "chart.js/auto";
-import { AlignLeft, X, RefreshCw, Moon, Sun } from "lucide-react";
+import { AlignLeft, X, Moon } from "lucide-react";
 import UserAvatar from "../auth/Avatar";
 import UserDropdown from "../auth/UserDropdown.jsx";
 import { useGetMeQuery } from "../../api/authApi.js";
 
+// ✅ Import your new widgets
+import SprintWidget from "./widgets/SprintWidget.jsx";
+import BurnChartWidget from "./widgets/BurnChartWidget.jsx";
+import RecentUpdatesWidget from "./widgets/RecentUpdatesWidget.jsx";
+
 const initialWidgets = [
-  {
-    id: 1,
-    type: "sprint",
-    title: "Sprint Progress",
-    content: { progress: 65 },
-  },
+  { id: 1, type: "sprint", title: "Sprint Progress", content: { progress: 65 } },
   { id: 2, type: "burn", title: "Burn Down Chart" },
   { id: 3, type: "updates", title: "Recent Updates", content: { items: 65 } },
 ];
 
+// ✅ Draggable wrapper
 const DraggableWidget = ({ id, children, onMove }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "widget",
@@ -52,29 +51,16 @@ const DraggableWidget = ({ id, children, onMove }) => {
 const OrgDashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [widgets, setWidgets] = useState(initialWidgets);
-
+  const [scrolled, setScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const { data: user, isSuccess, isLoading } = useGetMeQuery();
+  const { data: user, isSuccess } = useGetMeQuery();
   const isAuthenticated = isSuccess && !!user;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
-    // The mouse move listener is not directly used for the navbar functionality
-    // but is kept for consistency with your original code.
-    const handleMouseMove = (e) => {
-      // Original logic for mouse position, kept for continuity
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleMove = (fromId, toId) => {
@@ -86,21 +72,15 @@ const OrgDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Header */}
-      <header className="p-4 border-b border-white/10 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 hover:bg-white/5 transition-colors"
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6 text-violet-400" />
-            ) : (
-              <AlignLeft className="w-6 h-6 text-violet-400" />
-            )}
-          </button>
-          {/* <h1 className="text-xl font-thin">Project Dashboard</h1> */}
+    <div className="min-h-screen bg-[#0A0A0A] text-white flex">
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 w-64 bg-[#0A0A0A] border-r border-white/10 z-40
+          transform transition-transform duration-300
+          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0 md:static md:z-0`}
+      >
+        <div className="p-4">
           <div className="flex items-center">
             <a href="/">
               <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
@@ -108,138 +88,73 @@ const OrgDashboard = () => {
               </span>
             </a>
           </div>
+          {/* Add menu items here */}
         </div>
-        <div className="flex gap-2">
-          <button className="p-2 border border-white/10 hover:bg-white/5 transition-colors">
-            <Moon className="w-5 h-5 text-violet-400" />
-          </button>
-          <div
-            className="relative flex items-center justify-center"
-            onMouseEnter={() => setIsDropdownOpen(true)}
-            onMouseLeave={() => setIsDropdownOpen(false)}
-          >
-            <UserAvatar user={user} sizeClass="w-10 h-10 cursor-pointer " />
-            {isDropdownOpen && <UserDropdown />}
-          </div>
-        </div>
-      </header>
+      </div>
 
-      <DndProvider backend={HTML5Backend}>
-        {/* Mobile Menu */}
+      {/* Overlay for mobile menu */}
+      {isMobileMenuOpen && (
         <div
-          className={`lg:hidden fixed inset-y-0 left-0 transform ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } w-64 bg-[#0A0A0A] border-r border-white/10 z-40 transition-transform duration-300`}
-        >
-          <div className="p-4">
-            <h2 className="text-lg font-thin mb-4">Dashboard Menu</h2>
-            {/* Add mobile menu items here */}
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 ">
+        {/* Header */}
+        <header className="p-4 border-b border-white/10 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            {/* Show toggle only on mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 hover:bg-white/5 transition-colors"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6 text-violet-400" />
+              ) : (
+                <AlignLeft className="w-6 h-6 text-violet-400" />
+              )}
+            </button>            
           </div>
-        </div>
+          <div className="flex gap-2">
+            <button className="p-2 border border-white/10 hover:bg-white/5 transition-colors">
+              <Moon className="w-5 h-5 text-violet-400" />
+            </button>
+            <div
+              className="relative flex items-center justify-center"
+              onMouseEnter={() => setIsDropdownOpen(true)}
+              onMouseLeave={() => setIsDropdownOpen(false)}
+            >
+              <UserAvatar user={user} sizeClass="w-10 h-10 cursor-pointer " />
+              {isDropdownOpen && <UserDropdown />}
+            </div>
+          </div>
+        </header>
 
-        {/* Overlay for mobile menu */}
-        {isMobileMenuOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
+        {/* Widgets */}
+        <DndProvider backend={HTML5Backend}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            {widgets.map((widget) => (
+              <DraggableWidget key={widget.id} id={widget.id} onMove={handleMove}>
+                <div className="h-64">
+                  <h3 className="text-lg font-thin mb-4 border-b border-white/10 pb-2">
+                    {widget.title}
+                  </h3>
 
-        {/* Widgets Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-          {widgets.map((widget) => (
-            <DraggableWidget key={widget.id} id={widget.id} onMove={handleMove}>
-              <div className="h-64">
-                <h3 className="text-lg font-thin mb-4 border-b border-white/10 pb-2">
-                  {widget.title}
-                </h3>
-                {widget.type === "sprint" && (
-                  <div className="space-y-4">
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-purple-400 to-yellow-300 rounded-full"
-                        style={{ width: `${widget.content.progress}%` }}
-                      />
-                    </div>
-                    <p className="text-sm text-gray-400 font-extralight">
-                      {widget.content.progress}% completed (13/20 tasks)
-                    </p>
-                  </div>
-                )}
+                  {widget.type === "sprint" && (
+                    <SprintWidget progress={widget.content.progress} />
+                  )}
 
-                {widget.type === "burn" && (
-                  <Line
-                    data={{
-                      labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"],
-                      datasets: [
-                        {
-                          label: "Remaining Work",
-                          data: [20, 18, 15, 12, 8],
-                          borderColor: "#A78BFA",
-                          tension: 0.4,
-                        },
-                      ],
-                    }}
-                    options={{
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          labels: {
-                            color: "#fff",
-                            font: {
-                              family: "system-ui",
-                              weight: "300",
-                            },
-                          },
-                        },
-                      },
-                      scales: {
-                        x: {
-                          ticks: { color: "#fff", font: { weight: "300" } },
-                          grid: { color: "rgba(255, 255, 255, 0.1)" },
-                        },
-                        y: {
-                          ticks: { color: "#fff", font: { weight: "300" } },
-                          grid: { color: "rgba(255, 255, 255, 0.1)" },
-                        },
-                      },
-                    }}
-                  />
-                )}
+                  {widget.type === "burn" && <BurnChartWidget />}
 
-                {widget.type === "updates" && (
-                  <ul className="space-y-2">
-                    {[
-                      {
-                        title: "Bug fix: Login issue",
-                        status: "Done",
-                        color: "text-violet-400",
-                      },
-                      {
-                        title: "Feature: User profile",
-                        status: "In Progress",
-                        color: "text-yellow-300",
-                      },
-                    ].map((item, index) => (
-                      <li
-                        key={index}
-                        className="p-2 border border-white/10 rounded flex justify-between items-center hover:bg-white/5 transition-colors"
-                      >
-                        <span className="font-extralight">{item.title}</span>
-                        <span
-                          className={`${item.color} text-sm font-extralight`}
-                        >
-                          {item.status}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </DraggableWidget>
-          ))}
-        </div>
-      </DndProvider>
+                  {widget.type === "updates" && <RecentUpdatesWidget />}
+                </div>
+              </DraggableWidget>
+            ))}
+          </div>
+        </DndProvider>
+      </div>
     </div>
   );
 };

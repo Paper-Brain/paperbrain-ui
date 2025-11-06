@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-
+import { BASE_API_URL } from '../util/constants.js';
 // 1. Create the Context
 const AuthContext = createContext(null);
 
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       const validateUser = async () => {
         try {
           // Replace with your actual validation endpoint
-          const response = await axios.get('https://localhost:8000/api/v1/auth/me', { 
+          const response = await axios.get(`${BASE_API_URL}/auth/me`, { 
             headers: { 
               Authorization: `Bearer ${token}` 
             }

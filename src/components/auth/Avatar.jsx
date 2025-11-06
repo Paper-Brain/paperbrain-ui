@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Reusable component to display a user's avatar image or their initials as a fallback.
  * @param {object} user - The user object containing name, email, and avatar_url.
