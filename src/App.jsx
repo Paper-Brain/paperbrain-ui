@@ -45,7 +45,8 @@ function App() {
           <Route path="/create-org" element={<CreateOrg />} />
           <Route path="/invite-members" element={<InviteMembers />} />
           <Route path="/project-dashboard" element={<ProjectDashboard />} />
-          <Route path="/org-dashboard" element={<OrgDashboard />} />
+          <Route path="/organizations" element={<OrgDashboard />} />
+          <Route path="/organizations/:name" element={<OrgDashboard />} />
           <Route path="/test-summary" element={<UnitTestSummary />} />
           <Route path="/generate-test" element={<UnitTestGenerator />} />
 

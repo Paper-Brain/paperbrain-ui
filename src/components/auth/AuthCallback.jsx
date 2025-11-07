@@ -24,7 +24,7 @@ const AuthCallback = () => {
     if (hasOrg === undefined) return;
 
     if (isSuccess && user && hasOrg) {
-      navigate("/org-dashboard");
+      navigate("/organizations");
     } else if (isSuccess && user && !hasOrg) {
       navigate("/create-org");
     } else {

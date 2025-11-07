@@ -5,11 +5,9 @@ import { AlignLeft, X, Moon } from "lucide-react";
 import UserAvatar from "../auth/Avatar";
 import UserDropdown from "../auth/UserDropdown.jsx";
 import { useGetMeQuery } from "../../api/authApi.js";
-
-// ✅ Import your new widgets
-import SprintWidget from "./widgets/SprintWidget.jsx";
-import BurnChartWidget from "./widgets/BurnChartWidget.jsx";
-import RecentUpdatesWidget from "./widgets/RecentUpdatesWidget.jsx";
+import SprintWidget from "../dashboard/Widgets/SprintWidget.jsx";
+import BurnChartWidget from "../dashboard/Widgets/BurnChartWidget.jsx";
+import RecentUpdatesWidget from "../dashboard/Widgets/RecentUpdatesWidget.jsx";
 
 const initialWidgets = [
   { id: 1, type: "sprint", title: "Sprint Progress", content: { progress: 65 } },
@@ -17,7 +15,7 @@ const initialWidgets = [
   { id: 3, type: "updates", title: "Recent Updates", content: { items: 65 } },
 ];
 
-// ✅ Draggable wrapper
+
 const DraggableWidget = ({ id, children, onMove }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "widget",

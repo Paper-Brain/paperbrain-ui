@@ -80,7 +80,7 @@ const CreateOrg = () => {
       setOrgName("");
       setOrgSlug("");
       setDescription("");
-      navigate("/org-dashboard");
+      navigate(`/organizations/${orgName}`);
     } catch (error) {
       console.error("Error creating organization:", error);
     }
