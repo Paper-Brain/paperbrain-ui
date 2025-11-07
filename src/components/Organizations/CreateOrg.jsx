@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Building2, ArrowUpRight } from "lucide-react";
 import { SLUG_IRL } from "../../util/constants";
 import { useGetMeQuery } from "../../api/authApi.js";

@@ -18,9 +18,9 @@ import {
   AlignLeft,  
   X,
 } from "lucide-react";
-import { useGetMeQuery } from '../../api/authApi.js';
-import UserDropdown from '../auth/UserDropdown.jsx';
-import UserAvatar from '../auth/Avatar.jsx'; 
+import { useGetMeQuery } from '../../../api/authApi.js';
+import UserDropdown from '../../auth/UserDropdown.jsx';
+import UserAvatar from '../../auth/Avatar.jsx'; 
 
 const ProjectDashboard = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
