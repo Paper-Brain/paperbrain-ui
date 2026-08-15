@@ -178,7 +178,12 @@ const CreateOrg = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter organization description"
-                  className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm text-white"
+                  className={`
+                    w-full px-6 py-4
+                    bg-transparent border border-white/10 rounded-none
+                    focus:outline-none focus:ring-1 focus:ring-violet-400
+                    text-sm text-white
+                  `}
                 />
               </div>
 

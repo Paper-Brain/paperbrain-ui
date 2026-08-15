@@ -9,7 +9,6 @@ const testResults = [
 
 export default function UnitTestSummary() {
   const handleDownloadResults = () => {
-    console.log("Download test results");
   };
 
   return (
@@ -65,7 +64,15 @@ export default function UnitTestSummary() {
           {/* Download Button - Full width on mobile, auto width on larger screens */}
           <button
             onClick={handleDownloadResults}
-            className="mt-6 w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-md text-xs sm:text-sm font-extralight transition-colors duration-300"
+            className={`
+              mt-6 w-full sm:w-auto
+              flex items-center justify-center sm:justify-start gap-2
+              px-4 py-2
+              bg-white/5 hover:bg-white/10
+              text-gray-300 rounded-md
+              text-xs sm:text-sm font-extralight
+              transition-colors duration-300
+            `}
           >
             <Download size={16} className="text-violet-400" />
             Download Test Results

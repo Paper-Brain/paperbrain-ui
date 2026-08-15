@@ -146,9 +146,22 @@ const CreateProject = () => {
           {/* Advanced Toggle */}
 
           {/* Create Project Button */}
-          <button className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm font-medium tracking-wider transition-all duration-300 hover:opacity-90">
+          <button
+            className="
+              group w-full relative px-12 py-4
+              bg-gradient-to-r from-purple-400 to-yellow-300
+              text-blue-800 text-sm font-medium tracking-wider
+              transition-all duration-300 hover:opacity-90
+            "
+          >
             CONTINUE
-            <Plus className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+            <Plus
+              className="
+                inline-block ml-2 w-4 h-4
+                transition-transform duration-300
+                group-hover:-translate-y-1 group-hover:translate-x-1
+              "
+            />
           </button>
         </form>
       </div>

@@ -250,7 +250,16 @@ const NovaPro = () => {
           <p className="text-gray-400 mb-10 font-light text-lg">
             Join 200,000+ developers shipping better code, faster.
           </p>
-          <button className="px-10 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-black rounded-full text-sm font-semibold tracking-wide hover:scale-105 transition-transform inline-flex items-center gap-2">
+          <button
+            className={`
+              px-10 py-4
+              bg-gradient-to-r from-purple-400 to-yellow-300
+              text-black rounded-full
+              text-sm font-semibold tracking-wide
+              hover:scale-105 transition-transform
+              inline-flex items-center gap-2
+            `}
+          >
             Get Started Now
             <ChevronRight className="w-4 h-4" />
           </button>

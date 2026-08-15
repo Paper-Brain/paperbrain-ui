@@ -109,7 +109,14 @@ export default function LearnMorePage() {
             </h2>
             <button
               onClick={handleContactSupport}
-              className="px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider hover:bg-emerald-300 transition-colors duration-300 flex items-center justify-center mx-auto group"
+              className={`
+                px-12 py-4
+                bg-gradient-to-r from-purple-400 to-yellow-300
+                text-blue-800 text-sm tracking-wider
+                hover:bg-emerald-300
+                transition-colors duration-300
+                flex items-center justify-center mx-auto group
+              `}
             >
               START FREE TRIAL
               <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
