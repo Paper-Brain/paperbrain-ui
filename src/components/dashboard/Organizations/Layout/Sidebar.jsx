@@ -65,7 +65,13 @@ const Sidebar = ({
               onCreateOrg();
               if (typeof setIsMobileMenuOpen === "function") setIsMobileMenuOpen(false);
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 mt-2 text-sm text-violet-400 hover:text-violet-300 hover:bg-white/5 rounded-lg transition"
+            className={`
+              w-full flex items-center gap-2
+              px-3 py-2 mt-2
+              text-sm text-violet-400
+              hover:text-violet-300 hover:bg-white/5
+              rounded-lg transition
+            `}
           >
             <Plus className="w-4 h-4" /> New Organization
           </button>

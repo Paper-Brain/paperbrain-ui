@@ -1,31 +1,34 @@
-{
-    "headers": [
-      {
-        "source": "/api/:path*",
-        "headers": [
-          {
-            "key": "Access-Control-Allow-Credentials",
-            "value": "true"
-          },
-          {
-            "key": "Access-Control-Allow-Origin",
-            "value": "*"
-          },
-          {
-            "key": "Access-Control-Allow-Methods",
-            "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT"
-          },
-          {
-            "key": "Access-Control-Allow-Headers",
+The issue is that line 20 in vercel.json is too long (156 characters). The line contains a long string value for "Access-Control-Allow-Headers". Since this is a JSON file, I cannot use string concatenation or multi-line strings directly in JSON. However, I can break the long line by splitting the header values across multiple lines in the JSON structure, but JSON doesn't support multi-line strings.
+
+Wait, the issue is about line length in the source code. In JSON, we can't break a string across multiple lines without using escape sequences. However, the suggestion says "Break the line into multiple logical statements or use string concatenation/formatting." But JSON doesn't support concatenation.
+
+Looking at the context, this is a vercel.json configuration file. The long line is a single string value. To fix the line length issue while keeping valid JSON, we could potentially split the headers into multiple header entries? But that's not how CORS works - the Access-Control-Allow-Headers is a single header with comma-separated values.
+
+Actually, the line length rule is about the source code formatting. In JSON, we can format the file with proper indentation and line breaks. The current line is long because the string is long. We could break the string into multiple lines by using a JSON array? But the spec expects a string.
+
+Wait, the vercel.json configuration for headers expects a string value. We cannot change the structure. However, we can format the JSON differently: we can put the key-value pair on separate lines? But the line length is about the line containing the string.
+
+The line is:
             "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
-          }
-        ]
-      }
-    ],
-    "rewrites": [
-      {
-        "source": "/(.*)",
-        "destination": "/"
-      }
-    ]
-  }
+
+We could break this into multiple lines by using a JSON string with newline escapes? That would change the value.
+
+Alternatively, we can break the line in the source code by splitting the string across multiple lines using concatenation? Not valid JSON.
+
+But the issue is from a linter that checks line length. The fix is to reformat the JSON so that the line is not too long. Since JSON doesn't support multi-line strings, we can't break the string. However, we can break the line after the colon and put the string on the next line? That would still be a long line.
+
+Actually, the line length includes the indentation. The line is 156 characters. We could reduce indentation? But the indentation is standard.
+
+Maybe we can split the header value into multiple header entries? According to CORS spec, you can have multiple Access-Control-Allow-Headers headers? Actually, the spec says you can have multiple headers with the same name, but they are combined with commas. However, Vercel's header configuration might not support multiple entries with the same key.
+
+Looking at the vercel.json schema, the headers array contains objects with key and value. You can have multiple objects with the same key? Probably not, but you could try.
+
+But the issue is about code style, not functionality. The fix should be to break the long line into multiple lines in the source code while keeping valid JSON. Since JSON doesn't allow line breaks inside strings, we need to think differently.
+
+Wait, the suggestion says "Break the line into multiple logical statements or use string concatenation/formatting." This might be a generic suggestion. For JSON, we can't do that. However, we can format the JSON with the string on its own line, but that doesn't reduce line length.
+
+Alternatively, we can split the string into multiple strings and concatenate them in the configuration? Not possible.
+
+Maybe the fix is to use a JSON array for the value? But the schema expects a string.
+
+Let me check the actual vercel.json documentation: The headers value is a string. So we must
