@@ -15,7 +15,8 @@ const AuthCallback = () => {
 
   useEffect(() => {
     if (isError) {
-      console.error("Authentication failed: User data could not be fetched.");
+      import { logger } from "../../util/logger.js";
+      logger.error("Authentication failed: User data could not be fetched.");
       navigate("/login");
       return;
     }

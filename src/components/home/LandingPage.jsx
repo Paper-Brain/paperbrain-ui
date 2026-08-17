@@ -45,10 +45,12 @@ const NovaPro = () => {
       {/* 1. Matrix Grid Pattern */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div 
-          className="absolute inset-0 
-            bg-[linear-gradient(to_right, #ffffff07_1px, transparent_1px), 
-            linear-gradient(to_bottom, #ffffff07_1px, transparent_1px)] 
-            bg-[size:40px_40px]"
+          className={`
+            absolute inset-0 
+            bg-[linear-gradient(to_right, #ffffff07_1px, transparent_1px)] 
+            bg-[linear-gradient(to_bottom, #ffffff07_1px, transparent_1px)] 
+            bg-[size:40px_40px]
+          `}
         ></div>
 
       </div>
@@ -93,7 +95,15 @@ const NovaPro = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleRequestDemo}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-black text-sm font-semibold tracking-wide rounded-lg overflow-hidden transition-all hover:scale-105"
+                  className={`
+                    group relative 
+                    px-8 py-4 
+                    bg-gradient-to-r from-purple-400 to-yellow-300 
+                    text-black text-sm 
+                    font-semibold tracking-wide 
+                    rounded-lg overflow-hidden 
+                    transition-all hover:scale-105
+                  `}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-violet-200 to-fuchsia-200 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span className="relative flex items-center gap-2">
