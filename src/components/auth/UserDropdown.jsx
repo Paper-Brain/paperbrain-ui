@@ -24,7 +24,9 @@ const UserDropdown = () => {
       // On successful logout, force a redirect to the login page to clear the session
       window.location.href = '/login'; 
     } catch (error) {
-      console.error("Logout failed:", error);
+      // Import a logger utility for handling errors
+      import logger from '../../util/logger.js';
+      logger.error("Logout failed:", error);
       // Fallback: If logout request fails (e.g., server down), still redirect the user
       window.location.href = '/login';
     }

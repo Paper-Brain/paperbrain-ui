@@ -8,17 +8,10 @@ import GenerateButton from "./GenerateButton";
 import OutputConsole from "./OutputConsole";
 import Header from "./Header";
 import { generateTestCases } from "./testGenerator";
+import useUnitTestGenerator from "./useUnitTestGenerator";
 
 export default function UnitTestGenerator() {
-  const [framework, setFramework] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [output, setOutput] = useState("");
-
-  const handleGenerateTests = () => {
-    if (!framework) return;
-    const testCases = generateTestCases(framework);
-    setOutput(testCases);
-  };
+  const { framework, isOpen, output, handleGenerateTests, handleFrameworkChange, handleIsOpenChange } = useUnitTestGenerator();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center p-4">
@@ -28,8 +21,8 @@ export default function UnitTestGenerator() {
           <FrameworkSelect
             framework={framework}
             isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            setFramework={setFramework}
+            setIsOpen={handleIsOpenChange}
+            setFramework={handleFrameworkChange}
           />
           <GenerateButton
             framework={framework}

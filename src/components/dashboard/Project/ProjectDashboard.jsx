@@ -147,7 +147,10 @@ const ProjectDashboard = () => {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="w-full pl-10 pr-4 py-1.5 bg-transparent border border-white/10 focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm rounded-lg"
+                  className={
+                    "w-full pl-10 pr-4 py-1.5 bg-transparent border border-white/10 " +
+                    "focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm rounded-lg"
+                  }
                 />
               </div>
 

@@ -5,12 +5,10 @@ import { FeatureCard } from "./FeatureCard";
 import { EnterpriseCTA } from "./EnterpriseCTA";
 
 export default function EnterprisePage() {
-  const [activeFeature, setActiveFeature] = useState(0);
+  const { activeFeature, setActiveFeature } = useFeatureState();
   const navigate = useNavigate();
 
-  const handleContactSales = () => {
-    navigate("/request-demo");
-  };
+  const handleContactSales = useHandleContactSales(navigate);
 
   return (
     <div className="bg-[#0A0A0A] text-white selection:bg-violet-400 selection:text-black">

@@ -34,7 +34,7 @@ const Login = () => {
     if (provider === "GitHub") {
       try {
         // Call the backend to generate oauth_state and get authorization URL
-        const response = await axios.get('https://localhost:8000/api/v1/auth/github/login', { withCredentials: true});
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/github/login`, { withCredentials: true});
 
         // Redirect to GitHub OAuth with the generated URL
         window.location.href = response.data.authorization_url;
