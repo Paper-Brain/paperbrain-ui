@@ -1,39 +1,21 @@
-import React, { useState } from "react";
-import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useRegisterForm } from "../../hooks/useRegisterForm";
+import { InputField } from "./InputField";
+import { PasswordField } from "./PasswordField";
+import { SubmitButton } from "./SubmitButton";
+import { LoginLink } from "./LoginLink";
 
 const Register = () => {
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    // Simulate async registration
-    setTimeout(() => {
-      setLoading(false);
-      alert("Registration successful");
-      navigate("/verify-account");
-    }, 2000);
-  };
+  const {
+    formData,
+    loading,
+    handleChange,
+    handleSubmit,
+    passwordVisibility,
+    togglePasswordVisibility,
+    confirmPasswordVisibility,
+    toggleConfirmPasswordVisibility,
+  } = useRegisterForm();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center">
@@ -46,90 +28,45 @@ const Register = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Full Name"
-              className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
-              required
-            />
-          </div>
-          <div className="relative">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email"
-              className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
-              required
-            />
-          </div>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-            >
-              {showPassword ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-            </button>
-          </div>
-          <div className="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password"
-              className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-            </button>
-          </div>
+          <InputField
+            name="fullName"
+            label="Full Name"
+            type="text"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+          />
+          <InputField
+            name="email"
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+          <PasswordField
+            name="password"
+            label="Password"
+            value={formData.password}
+            onChange={handleChange}
+            showPassword={passwordVisibility.showPassword}
+            onToggleVisibility={togglePasswordVisibility}
+            required
+          />
+          <PasswordField
+            name="confirmPassword"
+            label="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            showPassword={confirmPasswordVisibility.showConfirmPassword}
+            onToggleVisibility={toggleConfirmPasswordVisibility}
+            required
+          />
 
-          <button className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300">
-            {loading ? "CREATING ACCOUNT..." : "REGISTER"}
-            <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
-          </button>
+          <SubmitButton loading={loading} />
         </form>
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-400 font-extralight">
-            Already have an account?{" "}
-            <a
-              href="/login"
-              className="text-violet-400 hover:underline transition-colors duration-300"
-            >
-              Login now
-            </a>
-          </p>
-        </div>
+        <LoginLink />
       </div>
     </div>
   );

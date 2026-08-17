@@ -7,6 +7,9 @@ const testResults = [
   { id: "3", file: "src/hooks/useData.test.js", passed: 2, failed: 2 },
 ];
 
+import TestResultsTable from "./TestResultsTable";
+import DownloadButton from "./DownloadButton";
+
 export default function UnitTestSummary() {
   const handleDownloadResults = () => {
   };
@@ -23,60 +26,8 @@ export default function UnitTestSummary() {
 
         {/* Content */}
         <div className="p-4 sm:p-6">
-          {/* Table Container with horizontal scroll for small screens */}
-          <div className="w-full overflow-x-auto -mx-4 sm:mx-0">
-            <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-white/10">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-xs sm:text-sm font-normal text-gray-400 whitespace-nowrap">
-                        File
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs sm:text-sm font-normal text-gray-400 whitespace-nowrap">
-                        Passed
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs sm:text-sm font-normal text-gray-400 whitespace-nowrap">
-                        Failed
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/10">
-                    {testResults.map((result) => (
-                      <tr key={result.id}>
-                        <td className="py-3 px-4 text-xs sm:text-sm text-gray-300 font-extralight break-all sm:break-normal">
-                          {result.file}
-                        </td>
-                        <td className="py-3 px-4 text-xs sm:text-sm text-emerald-400 font-extralight whitespace-nowrap">
-                          {result.passed}
-                        </td>
-                        <td className="py-3 px-4 text-xs sm:text-sm text-red-400 font-extralight whitespace-nowrap">
-                          {result.failed}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Download Button - Full width on mobile, auto width on larger screens */}
-          <button
-            onClick={handleDownloadResults}
-            className={`
-              mt-6 w-full sm:w-auto
-              flex items-center justify-center sm:justify-start gap-2
-              px-4 py-2
-              bg-white/5 hover:bg-white/10
-              text-gray-300 rounded-md
-              text-xs sm:text-sm font-extralight
-              transition-colors duration-300
-            `}
-          >
-            <Download size={16} className="text-violet-400" />
-            Download Test Results
-          </button>
+          <TestResultsTable results={testResults} />
+          <DownloadButton onClick={handleDownloadResults} />
         </div>
       </div>
     </div>

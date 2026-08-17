@@ -50,7 +50,12 @@ const ForgotPassword = () => {
 
           <button
             type="submit"
-            className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+            className={`
+              group w-full relative px-12 py-4
+              bg-gradient-to-r from-purple-400 to-yellow-300
+              text-blue-800 text-sm tracking-wider
+              transition-all duration-300
+            `}
             disabled={loading}
           >
             {loading ? "SENDING LINK..." : "SEND RESET LINK"}

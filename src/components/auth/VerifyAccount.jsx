@@ -79,7 +79,11 @@ const VerifyAccount = () => {
                 value={digit}
                 onChange={(e) => handleChange(e.target, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
-                className="w-12 h-12 text-center bg-transparent border border-white/10 focus:border-violet-400 focus:ring-1 focus:ring-violet-400 text-lg font-light outline-none transition-all"
+                className={
+                  "w-12 h-12 text-center bg-transparent border border-white/10 " +
+                  "focus:border-violet-400 focus:ring-1 focus:ring-violet-400 " +
+                  "text-lg font-light outline-none transition-all"
+                }
               />
             ))}
           </div>
