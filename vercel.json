@@ -9,7 +9,18 @@ Actually, the line length rule is about the source code formatting. In JSON, we 
 Wait, the vercel.json configuration for headers expects a string value. We cannot change the structure. However, we can format the JSON differently: we can put the key-value pair on separate lines? But the line length is about the line containing the string.
 
 The line is:
-            "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
+            "value": [
+                "X-CSRF-Token",
+                "X-Requested-With",
+                "Accept",
+                "Accept-Version",
+                "Content-Length",
+                "Content-MD5",
+                "Content-Type",
+                "Date",
+                "X-Api-Version",
+                "Authorization"
+            ].join(", ")
 
 We could break this into multiple lines by using a JSON string with newline escapes? That would change the value.
 
