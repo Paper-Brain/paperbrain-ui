@@ -132,7 +132,12 @@ const Login = () => {
               </div>
               <button
                 type="submit"
-                className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+                className={
+                  "group w-full relative px-12 py-4 " +
+                  "bg-gradient-to-r from-purple-400 to-yellow-300 " +
+                  "text-blue-800 text-sm tracking-wider " +
+                  "transition-all duration-300"
+                }
               >
                 LOGIN
                 <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
@@ -170,7 +175,12 @@ const Login = () => {
                 <button
                   key={provider.name}
                   onClick={() => handleOAuthLogin(provider.name)}
-                  className={`group w-full px-6 py-4 rounded-md bg-gradient-to-r ${provider.color} border border-white/10 text-white text-sm tracking-wider transition-all duration-300 hover:scale-[1.02] flex items-center justify-between`}
+                  className={
+                    `group w-full px-6 py-4 rounded-md bg-gradient-to-r ${provider.color} ` +
+                    "border border-white/10 text-white text-sm tracking-wider " +
+                    "transition-all duration-300 hover:scale-[1.02] " +
+                    "flex items-center justify-between"
+                  }
                 >
                   <div className="flex items-center gap-3">
                     <span className="flex items-center justify-center w-5 h-5">
