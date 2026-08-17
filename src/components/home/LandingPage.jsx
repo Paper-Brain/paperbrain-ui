@@ -205,7 +205,15 @@ const NovaPro = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
             {metrics.map((metric, index) => (
               <div key={index} className="group cursor-default">
-                <div className="text-4xl md:text-5xl font-thin bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent mb-2 group-hover:text-violet-300 transition-colors">
+                <div
+                  className={`
+                    text-4xl md:text-5xl font-thin
+                    bg-gradient-to-r from-purple-400 to-yellow-300
+                    bg-clip-text text-transparent
+                    mb-2
+                    group-hover:text-violet-300 transition-colors
+                  `}
+                >
                   {metric.value}
                 </div>
                 <div className="text-xs tracking-[0.2em] text-gray-500 uppercase">
