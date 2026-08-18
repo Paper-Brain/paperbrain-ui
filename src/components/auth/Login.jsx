@@ -11,6 +11,7 @@ const Login = () => {
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,23 +30,29 @@ const Login = () => {
     }, 1000);
   };
 
-   const handleOAuthLogin = async (provider) => {
-    // *** THIS IS THE FIX ***
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleOAuthLogin = async (provider) => {
     if (provider === "GitHub") {
       try {
-        // Call the backend to generate oauth_state and get authorization URL
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/github/login`, { withCredentials: true});
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+        const response = await axios.get(
+          `${apiBaseUrl}/api/v1/auth/github/login`,
+          { withCredentials: true }
+        );
 
-        // Redirect to GitHub OAuth with the generated URL
         window.location.href = response.data.authorization_url;
       } catch (error) {
-        console.error("Error during GitHub OAuth login:", error);
+        showToast("Failed to initiate GitHub login. Please try again.");
       }
     } else {
-      // Other providers can be handled here
-      alert(`Login with ${provider}`);
+      showToast(`${provider} login is not yet implemented.`);
     }
   };
+>
 
   const oauthProviders = [
     {
@@ -139,6 +146,7 @@ const Login = () => {
                   "transition-all duration-300"
                 }
               >
+>
                 LOGIN
                 <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
               </button>
@@ -176,12 +184,15 @@ const Login = () => {
                   key={provider.name}
                   onClick={() => handleOAuthLogin(provider.name)}
                   className={
-                    `group w-full px-6 py-4 rounded-md bg-gradient-to-r ${provider.color} ` +
-                    "border border-white/10 text-white text-sm tracking-wider " +
-                    "transition-all duration-300 hover:scale-[1.02] " +
-                    "flex items-center justify-between"
+                    "group w-full px-6 py-4 rounded-md " +
+                    "bg-gradient-to-r " +
+                    `${provider.color} ` +
+                    "border border-white/10 text-white text-sm " +
+                    "tracking-wider transition-all duration-300 " +
+                    "hover:scale-[1.02] flex items-center justify-between"
                   }
                 >
+>
                   <div className="flex items-center gap-3">
                     <span className="flex items-center justify-center w-5 h-5">
                       {provider.name === "Bitbucket" ? (
@@ -201,7 +212,16 @@ const Login = () => {
         </div>
       </div>
     </div>
+    {toast && (
+      <div
+        className="fixed bottom-6 right-6 z-50 px-6 py-4 bg-gray-900 border border-white/10 rounded-lg shadow-lg animate-slide-in"
+        role="alert"
+      >
+        <p className="text-sm text-white">{toast}</p>
+      </div>
+    )}
   );
 };
 
 export default Login;
+>
