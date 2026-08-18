@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Building2, ArrowUpRight } from "lucide-react";
 import { SLUG_IRL } from "../../util/constants";
 import { useGetMeQuery } from "../../api/authApi.js";
@@ -43,48 +43,52 @@ const CreateOrg = () => {
     setOrgSlug(slugify(orgName));
   }, [orgName]);
 
-  // ✅ Debounced check for organization availability
-  useEffect(() => {
-    if (!orgName) {
-      setIsAvailable(null);
-      return;
-    }
-
-    const debouncedCheck = debounce(async () => {
+  // Debounced check for organization availability
+  const checkAvailability = useCallback(
+    debounce(async (name) => {
+      if (!name) {
+        setIsAvailable(null);
+        return;
+      }
       try {
-        const res = await checkNameAvailability(orgName).unwrap();
+        const res = await checkNameAvailability(name).unwrap();
         setIsAvailable(res?.available);
-      } catch (err) {
-        console.error("Error checking org name:", err);
+      } catch {
         setIsAvailable(null);
       }
-    }, 500);
+    }, 500),
+    [checkNameAvailability]
+  );
 
-    debouncedCheck();
-    return () => debouncedCheck.cancel();
-  }, [orgName, checkNameAvailability]);
+  useEffect(() => {
+    checkAvailability(orgName);
+    return () => checkAvailability.cancel();
+  }, [orgName, checkAvailability]);
 
-  const handleCreateOrg = async (e) => {
-    e.preventDefault();
-    if (!orgName || !orgSlug || !isAvailable || !currentUserId) return;
+  const handleCreateOrg = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!orgName || !orgSlug || !isAvailable || !currentUserId) return;
 
-    const payload = {
-      name: orgName,
-      description,
-      slug: baseUrl,
-      owner_user_id: currentUserId,
-    };
+      const payload = {
+        name: orgName,
+        description,
+        slug: baseUrl,
+        owner_user_id: currentUserId,
+      };
 
-    try {
-      await createOrganization(payload).unwrap();
-      setOrgName("");
-      setOrgSlug("");
-      setDescription("");
-      navigate(`/organizations/${orgName}`);
-    } catch (error) {
-      console.error("Error creating organization:", error);
-    }
-  };
+      try {
+        await createOrganization(payload).unwrap();
+        setOrgName("");
+        setOrgSlug("");
+        setDescription("");
+        navigate(`/organizations/${orgName}`);
+      } catch {
+        // Error handled by form validation and UI feedback
+      }
+    },
+    [orgName, orgSlug, description, isAvailable, currentUserId, baseUrl, createOrganization, navigate]
+  );
 
   const isButtonDisabled =
     !orgName ||
@@ -178,12 +182,11 @@ const CreateOrg = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter organization description"
-                  className={`
-                    w-full px-6 py-4
-                    bg-transparent border border-white/10 rounded-none
-                    focus:outline-none focus:ring-1 focus:ring-violet-400
-                    text-sm text-white
-                  `}
+                  className={
+                    "w-full px-6 py-4 bg-transparent border border-white/10 " +
+                    "rounded-none focus:outline-none focus:ring-1 " +
+                    "focus:ring-violet-400 text-sm text-white"
+                  }
                 />
               </div>
 
@@ -209,3 +212,4 @@ const CreateOrg = () => {
 };
 
 export default CreateOrg;
+>

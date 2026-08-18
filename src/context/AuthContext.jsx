@@ -1,56 +1,44 @@
 // src/context/AuthContext.jsx
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_API_URL } from '../util/constants.js';
+
 // 1. Create the Context
 const AuthContext = createContext(null);
 
-// Optional: Define a function to retrieve the user's token (e.g., from localStorage)
-const getAuthToken = () => localStorage.getItem('authToken');
-
 // 2. Create the Provider Component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Holds the user object
-  const [loading, setLoading] = useState(true); // To prevent rendering before check
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // This function would be called after a successful OAuth redirect/callback
-  const login = (userData, token) => {
-    setUser(userData);
-    localStorage.setItem('authToken', token); // Store the token for future requests
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('authToken');
-    // Optional: Redirect to login page
-  };
-
-  // Logic to validate token and fetch user on application load
-  useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      // In a real app, you would hit your backend's /api/v1/auth/me endpoint
-      // to validate the token and get the latest user data.
-      const validateUser = async () => {
-        try {
-          // Replace with your actual validation endpoint
-          const response = await axios.get(`${BASE_API_URL}/auth/me`, { 
-            headers: { 
-              Authorization: `Bearer ${token}` 
-            }
-          });
-          setUser(response.data);
-        } catch (error) {
-          console.error("Token validation failed:", error);
-          logout(); // Clear bad token
-        } finally {
-          setLoading(false);
-        }
-      };
-      validateUser();
-    } else {
+  // Extracted: Validate session with backend (relies on httpOnly cookie)
+  const validateSession = useCallback(async () => {
+    try {
+      const response = await axios.get(`${BASE_API_URL}/auth/me`, {
+        withCredentials: true, // Critical: sends httpOnly cookie automatically
+      });
+      setUser(response.data);
+    } catch (error) {
+      // Token invalid/expired - user remains null
+      setUser(null);
+    } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    validateSession();
+  }, [validateSession]);
+
+  // Called by OAuth callback route after backend sets httpOnly cookie
+  const login = useCallback((userData) => {
+    setUser(userData);
+  }, []);
+
+  // Clears local state; backend should clear cookie via /logout endpoint
+  const logout = useCallback(() => {
+    setUser(null);
   }, []);
 
   const contextValue = {
@@ -58,10 +46,9 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
-    isAuthenticated: !!user, // Helper boolean
+    isAuthenticated: !!user,
   };
 
-  // If you are loading, you might want to show a spinner here
   if (loading) {
     return <div>Loading user session...</div>;
   }
@@ -77,3 +64,4 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   return useContext(AuthContext);
 };
+>

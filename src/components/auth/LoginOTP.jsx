@@ -1,12 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, ArrowUpRight, Mail, KeyRound } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Mail, KeyRound, CheckCircle, AlertCircle } from "lucide-react";
 
 const LoginOTP = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const inputRefs = useRef([]);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+>
 
   useEffect(() => {
     if (step === 2 && inputRefs.current[0]) {
@@ -48,7 +55,7 @@ const LoginOTP = () => {
     // Simulate OTP verification
     setTimeout(() => {
       setLoading(false);
-      alert("Login successful");
+      showToast("Login successful", "success");
     }, 2000);
   };
 
@@ -57,9 +64,10 @@ const LoginOTP = () => {
     // Simulate resending OTP
     setTimeout(() => {
       setLoading(false);
-      alert("New OTP sent");
+      showToast("New OTP sent", "info");
     }, 1000);
   };
+>
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center">
@@ -94,12 +102,38 @@ const LoginOTP = () => {
 
             <button
               type="submit"
-              className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+              className="
+                group
+                w-full
+                relative
+                px-12
+                py-4
+                bg-gradient-to-r
+                from-purple-400
+                to-yellow-300
+                text-blue-800
+                text-sm
+                tracking-wider
+                transition-all
+                duration-300
+              "
               disabled={loading}
             >
               {loading ? "SENDING OTP..." : "SEND OTP"}
-              <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+              <ArrowUpRight
+                className="
+                  inline-block
+                  ml-2
+                  w-4
+                  h-4
+                  transition-transform
+                  duration-300
+                  group-hover:-translate-y-1
+                  group-hover:translate-x-1
+                "
+              />
             </button>
+>
           </form>
         ) : (
           <form onSubmit={handleOTPSubmit} className="space-y-8">
@@ -117,23 +151,60 @@ const LoginOTP = () => {
                   value={digit}
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
-                  className={
-                    "w-12 h-12 text-center bg-transparent border border-white/10 " +
-                    "focus:border-violet-400 focus:ring-1 focus:ring-violet-400 " +
-                    "text-lg font-light outline-none transition-all"
-                  }
+                  className="
+                    w-12
+                    h-12
+                    text-center
+                    bg-transparent
+                    border
+                    border-white/10
+                    focus:border-violet-400
+                    focus:ring-1
+                    focus:ring-violet-400
+                    text-lg
+                    font-light
+                    outline-none
+                    transition-all
+                  "
+>
                 />
               ))}
             </div>
 
             <button
               type="submit"
-              className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+              className="
+                group
+                w-full
+                relative
+                px-12
+                py-4
+                bg-gradient-to-r
+                from-purple-400
+                to-yellow-300
+                text-blue-800
+                text-sm
+                tracking-wider
+                transition-all
+                duration-300
+              "
               disabled={loading || otp.join("").length !== 6}
             >
               {loading ? "VERIFYING..." : "VERIFY & LOGIN"}
-              <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+              <ArrowUpRight
+                className="
+                  inline-block
+                  ml-2
+                  w-4
+                  h-4
+                  transition-transform
+                  duration-300
+                  group-hover:-translate-y-1
+                  group-hover:translate-x-1
+                "
+              />
             </button>
+>
 
             <div className="text-center">
               <button
@@ -147,9 +218,48 @@ const LoginOTP = () => {
             </div>
           </form>
         )}
+
+        {toast && (
+          <div
+            className="
+              fixed
+              bottom-6
+              right-6
+              z-50
+              flex
+              items-center
+              gap-3
+              px-4
+              py-3
+              rounded-lg
+              shadow-lg
+              animate-slide-in
+              ${toast.type === "success"
+                ? "bg-green-600 text-white"
+                : toast.type === "error"
+                ? "bg-red-600 text-white"
+                : "bg-blue-600 text-white"
+              }
+            "
+            role="alert"
+            aria-live="polite"
+          >
+            {toast.type === "success" && (
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            )}
+            {toast.type === "error" && (
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            )}
+            {toast.type === "info" && (
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            )}
+            <span className="text-sm font-medium">{toast.message}</span>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default LoginOTP;
+>
