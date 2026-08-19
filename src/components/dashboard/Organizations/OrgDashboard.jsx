@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Sidebar from "../Organizations/Layout/Sidebar.jsx";
 import Header from "../Organizations/Layout/Header";
 import WidgetsGrid from "../Organizations/Layout/WidgetsGrid";
@@ -17,9 +17,91 @@ const initialWidgets = [
   { id: 3, type: "updates", title: "Recent Updates", content: { items: 65 } },
 ];
 
+/**
+ * Renders a single widget based on its type.
+ * Extracted to reduce cyclomatic complexity in the main component.
+ */
+const renderWidget = useCallback((widget) => {
+  switch (widget.type) {
+    case "sprint":
+      return <SprintWidget key={widget.id} progress={widget.content?.progress ?? 0} />;
+    case "burn":
+      return <BurnChartWidget key={widget.id} />;
+    case "updates":
+      return <RecentUpdatesWidget key={widget.id} />;
+    default:
+      return null;
+  }
+}, []);
+
+/**
+ * Handles widget reordering via drag-and-drop.
+ * Pure function for testability and separation of concerns.
+ */
+const moveWidget = useCallback((widgets, fromId, toId) => {
+  const fromIndex = widgets.findIndex((w) => w.id === fromId);
+  const toIndex = widgets.findIndex((w) => w.id === toId);
+  
+  if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+    return widgets;
+  }
+  
+  const newWidgets = [...widgets];
+  const [removed] = newWidgets.splice(fromIndex, 1);
+  newWidgets.splice(toIndex, 0, removed);
+  return newWidgets;
+}, []);
+
+/**
+ * Error state component for failed organization loading.
+ * Separated for single responsibility and cleaner main render.
+ */
+const OrganizationsError = () => (
+  <div className="min-h-screen flex items-center justify-center text-red-500" role="alert">
+    Failed to load organizations. Please try again later.
+  </div>
+);
+
+/**
+ * Main dashboard content area (header + widget grid).
+ * Extracted to reduce nesting and improve readability.
+ */
+const DashboardContent = ({ 
+  user, 
+  selectedOrg, 
+  widgets, 
+  onMove, 
+  isMobileMenuOpen, 
+  onToggleSidebar 
+}) => (
+  <div className="flex-1">
+    <Header
+      onToggleSidebar={onToggleSidebar}
+      isMobileMenuOpen={isMobileMenuOpen}
+      selectedOrgName={selectedOrg?.name || "No Organization"}
+      user={user}
+    />
+    <WidgetsGrid widgets={widgets} onMove={onMove} renderWidget={renderWidget} />
+  </div>
+);
+
+/**
+ * Mobile sidebar overlay component.
+ * Extracted for separation of concerns.
+ */
+const MobileOverlay = ({ isOpen, onClose }) => (
+  isOpen && (
+    <div
+      className="fixed inset-0 bg-black/50 z-30 md:hidden"
+      onClick={onClose}
+      aria-hidden="true"
+    />
+  )
+);
+
 const OrgDashboard = () => {
   // 1. Authenticated user
-  const { data: user, } = useGetMeQuery();
+  const { data: user } = useGetMeQuery();
   const currentUserId = user?.id;
 
   // 2. Fetch organizations for that user
@@ -35,71 +117,55 @@ const OrgDashboard = () => {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCreateOrgOpen, setIsCreateOrgOpen] = useState(false);
+
   // 4. Automatically select the first organization once data is loaded
   useEffect(() => {
     if (!isOrgsLoading && organizations.length > 0 && !selectedOrg) {
       setSelectedOrg(organizations[0]);
     }
-  }, [organizations, isOrgsLoading]);
+  }, [organizations, isOrgsLoading, selectedOrg]);
 
-  // 5. Handle drag movement
-  const handleMove = (fromId, toId) => {
-    const fromIndex = widgets.findIndex((w) => w.id === fromId);
-    const toIndex = widgets.findIndex((w) => w.id === toId);
-    const newWidgets = [...widgets];
-    newWidgets.splice(toIndex, 0, newWidgets.splice(fromIndex, 1)[0]);
-    setWidgets(newWidgets);
-  };
+  // 5. Handle drag movement - wrapped in useCallback for stable reference
+  const handleMove = useCallback((fromId, toId) => {
+    setWidgets((currentWidgets) => moveWidget(currentWidgets, fromId, toId));
+  }, []);
 
- 
+  // Early return for error state
   if (isOrgsError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        Failed to load organizations.
-      </div>
-    );
+    return <OrganizationsError />;
   }
+
+  // Memoize sidebar props to prevent unnecessary re-renders
+  const sidebarProps = useMemo(() => ({
+    organizations,
+    selectedOrg,
+    onSelectOrg: setSelectedOrg,
+    onCreateOrg: () => setIsCreateOrgOpen(true),
+    onOpenSettings: () => setIsSettingsOpen(true),
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+  }), [organizations, selectedOrg, isMobileMenuOpen]);
+
+  // Memoize content props
+  const contentProps = useMemo(() => ({
+    user,
+    selectedOrg,
+    widgets,
+    onMove: handleMove,
+    isMobileMenuOpen,
+    onToggleSidebar: () => setIsMobileMenuOpen((prev) => !prev),
+  }), [user, selectedOrg, widgets, handleMove, isMobileMenuOpen]);
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
       {/* Sidebar */}
-      <Sidebar
-        organizations={organizations}
-        selectedOrg={selectedOrg}
-        onSelectOrg={(org) => setSelectedOrg(org)}
-        onCreateOrg={() => setIsCreateOrgOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-      />
+      <Sidebar {...sidebarProps} />
 
       {/* Overlay (mobile) */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      <MobileOverlay isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
       {/* Main content */}
-      <div className="flex-1">
-        <Header
-          onToggleSidebar={() => setIsMobileMenuOpen((s) => !s)}
-          isMobileMenuOpen={isMobileMenuOpen}
-          selectedOrgName={selectedOrg?.name || "No Organization"}
-          user={user}
-        />
-
-        <WidgetsGrid widgets={widgets} onMove={handleMove}>
-          {(widget) => {
-            if (widget.type === "sprint")
-              return <SprintWidget progress={widget.content.progress} />;
-            if (widget.type === "burn") return <BurnChartWidget />;
-            if (widget.type === "updates") return <RecentUpdatesWidget />;
-            return null;
-          }}
-        </WidgetsGrid>
-      </div>
+      <DashboardContent {...contentProps} />
 
       {/* Settings Modal */}
       <OrganizationSettingsModal
@@ -107,12 +173,12 @@ const OrgDashboard = () => {
         onClose={() => setIsSettingsOpen(false)}
         selectedOrg={selectedOrg}
       />
-      {/* New Organizationmodal Modal */}
-<CreateOrganizationModal
-className="mt-16"
-open={isCreateOrgOpen}
-onClose={() => setIsCreateOrgOpen(false)}
-/>
+
+      {/* Create Organization Modal */}
+      <CreateOrganizationModal
+        open={isCreateOrgOpen}
+        onClose={() => setIsCreateOrgOpen(false)}
+      />
     </div>
   );
 };

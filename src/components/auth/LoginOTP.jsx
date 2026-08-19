@@ -6,7 +6,13 @@ const LoginOTP = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const inputRefs = useRef([]);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     if (step === 2 && inputRefs.current[0]) {
@@ -48,7 +54,7 @@ const LoginOTP = () => {
     // Simulate OTP verification
     setTimeout(() => {
       setLoading(false);
-      alert("Login successful");
+      showToast("Login successful", "success");
     }, 2000);
   };
 
@@ -57,7 +63,7 @@ const LoginOTP = () => {
     // Simulate resending OTP
     setTimeout(() => {
       setLoading(false);
-      alert("New OTP sent");
+      showToast("New OTP sent", "success");
     }, 1000);
   };
 
@@ -94,7 +100,11 @@ const LoginOTP = () => {
 
             <button
               type="submit"
-              className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+              className={
+                "group w-full relative px-12 py-4 bg-gradient-to-r " +
+                "from-purple-400 to-yellow-300 text-blue-800 " +
+                "text-sm tracking-wider transition-all duration-300"
+              }
               disabled={loading}
             >
               {loading ? "SENDING OTP..." : "SEND OTP"}
@@ -117,14 +127,22 @@ const LoginOTP = () => {
                   value={digit}
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
-                  className="w-12 h-12 text-center bg-transparent border border-white/10 focus:border-violet-400 focus:ring-1 focus:ring-violet-400 text-lg font-light outline-none transition-all"
+                  className={
+                    "w-12 h-12 text-center bg-transparent border border-white/10 " +
+                    "focus:border-violet-400 focus:ring-1 focus:ring-violet-400 " +
+                    "text-lg font-light outline-none transition-all"
+                  }
                 />
               ))}
             </div>
 
             <button
               type="submit"
-              className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
+              className={
+                "group w-full relative px-12 py-4 bg-gradient-to-r " +
+                "from-purple-400 to-yellow-300 text-blue-800 " +
+                "text-sm tracking-wider transition-all duration-300"
+              }
               disabled={loading || otp.join("").length !== 6}
             >
               {loading ? "VERIFYING..." : "VERIFY & LOGIN"}
@@ -144,6 +162,16 @@ const LoginOTP = () => {
           </form>
         )}
       </div>
+      {toast && (
+        <div
+          className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg text-sm animate-fade-in ${
+            toast.type === "success" ? "bg-green-600" : "bg-red-600"
+          }`}
+          role="alert"
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 };
