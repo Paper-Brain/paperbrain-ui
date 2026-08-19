@@ -6,16 +6,28 @@ import { BASE_API_URL } from '../util/constants.js';
 // 1. Create the Context
 const AuthContext = createContext(null);
 
+// Axios instance with credentials for httpOnly cookie handling defined outside component
+// to prevent recreation on every render and simplify dependency trees.
+const api = axios.create({
+  baseURL: BASE_API_URL,
+  withCredentials: true, // Critical: sends httpOnly cookies automatically
+});
+
+// Helper to safely validate session
+const fetchSessionUser = async () => {
+  const response = await api.get('/auth/me');
+  return response.data;
+};
+
+// Helper to safely trigger backend logout
+const requestLogout = async () => {
+  await api.post('/auth/logout');
+};
+
 // 2. Create the Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Axios instance with credentials for httpOnly cookie handling
-  const api = axios.create({
-    baseURL: BASE_API_URL,
-    withCredentials: true, // Critical: sends httpOnly cookies automatically
-  });
 
   // Login: backend sets httpOnly cookie; we only receive user data
   const login = useCallback((userData) => {
@@ -25,14 +37,13 @@ export const AuthProvider = ({ children }) => {
   // Logout: call backend to clear httpOnly cookie, then clear local state
   const logout = useCallback(async () => {
     try {
-      await api.post('/auth/logout');
-    } catch (error) {
-      // Log but don't block local logout on network failure
-      console.warn('Logout request failed, clearing local session:', error.message);
+      await requestLogout();
+    } catch {
+      // Silent catch to prevent blocking local logout on network failure
     } finally {
       setUser(null);
     }
-  }, [api]);
+  }, []);
 
   // Validate session on mount using cookie-based auth
   useEffect(() => {
@@ -40,15 +51,11 @@ export const AuthProvider = ({ children }) => {
 
     const validateSession = async () => {
       try {
-        const response = await api.get('/auth/me');
+        const userData = await fetchSessionUser();
         if (mounted) {
-          setUser(response.data);
+          setUser(userData);
         }
-      } catch (error) {
-        // 401/403 = no valid session; treat as unauthenticated (no error log)
-        if (error.response?.status !== 401 && error.response?.status !== 403) {
-          console.error('Session validation error:', error.message);
-        }
+      } catch {
         if (mounted) {
           setUser(null);
         }
@@ -64,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       mounted = false;
     };
-  }, [api]);
+  }, []);
 
   const contextValue = {
     user,

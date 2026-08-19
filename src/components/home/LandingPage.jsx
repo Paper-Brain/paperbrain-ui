@@ -9,11 +9,9 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const NovaPro = () => {
+const useMousePosition = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const navigate = useNavigate();
 
-  // Smoother mouse tracking
   useEffect(() => {
     const handleMouseMove = (event) => {
       setMousePosition({
@@ -24,6 +22,13 @@ const NovaPro = () => {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+
+  return mousePosition;
+};
+
+const NovaPro = () => {
+  const mousePosition = useMousePosition();
+  const navigate = useNavigate();
 
   const handleRequestDemo = () => navigate("/request-demo");
   const handleLearnMore = () => navigate("/learn-more");
@@ -44,7 +49,14 @@ const NovaPro = () => {
       {/* --- BACKGROUND EFFECTS --- */}
       {/* 1. Matrix Grid Pattern */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff07_1px,transparent_1px),linear-gradient(to_bottom,#ffffff07_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #ffffff07 1px, transparent 1px), linear-gradient(to bottom, #ffffff07 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        ></div>
 
       </div>
 
@@ -88,7 +100,11 @@ const NovaPro = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleRequestDemo}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-black text-sm font-semibold tracking-wide rounded-lg overflow-hidden transition-all hover:scale-105"
+                  className={
+                    "group relative px-8 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 " +
+                    "text-black text-sm font-semibold tracking-wide rounded-lg overflow-hidden " +
+                    "transition-all hover:scale-105"
+                  }
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-violet-200 to-fuchsia-200 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span className="relative flex items-center gap-2">
@@ -205,7 +221,11 @@ const NovaPro = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
             {metrics.map((metric, index) => (
               <div key={index} className="group cursor-default">
-                <div className="text-4xl md:text-5xl font-thin bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent mb-2 group-hover:text-violet-300 transition-colors">
+                <div
+                  className={
+                    "text-4xl md:text-5xl font-thin bg-gradient-to-r from-purple-400 to-yellow-300 " +
+                    "bg-clip-text text-transparent mb-2 group-hover:text-violet-300 transition-colors"
+                  }
                   {metric.value}
                 </div>
                 <div className="text-xs tracking-[0.2em] text-gray-500 uppercase">
@@ -250,7 +270,12 @@ const NovaPro = () => {
           <p className="text-gray-400 mb-10 font-light text-lg">
             Join 200,000+ developers shipping better code, faster.
           </p>
-          <button className="px-10 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-black rounded-full text-sm font-semibold tracking-wide hover:scale-105 transition-transform inline-flex items-center gap-2">
+          <button
+            className={
+              "px-10 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-black " +
+              "rounded-full text-sm font-semibold tracking-wide hover:scale-105 " +
+              "transition-transform inline-flex items-center gap-2"
+            }
             Get Started Now
             <ChevronRight className="w-4 h-4" />
           </button>

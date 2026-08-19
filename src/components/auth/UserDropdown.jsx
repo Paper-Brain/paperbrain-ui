@@ -21,11 +21,9 @@ const UserDropdown = () => {
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      // On successful logout, force a redirect to the login page to clear the session
-      window.location.href = '/login'; 
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Fallback: If logout request fails (e.g., server down), still redirect the user
+    } catch {
+      // Logout failed silently; redirect anyway to clear stale session
+    } finally {
       window.location.href = '/login';
     }
   };
@@ -77,7 +75,11 @@ const UserDropdown = () => {
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors duration-300 font-extralight disabled:opacity-50"
+          className={
+            "flex items-center gap-3 w-full px-4 py-3 text-sm " +
+            "text-gray-400 hover:bg-white/5 transition-colors " +
+            "duration-300 font-extralight disabled:opacity-50"
+          }
         >
           <LogOut size={18} className="text-violet-400" />
           {isLoggingOut ? <Loader /> : 'Log out'}

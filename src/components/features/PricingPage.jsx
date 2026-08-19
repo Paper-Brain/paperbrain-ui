@@ -86,9 +86,24 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
-                <button className="w-full px-6 py-3 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider hover:bg-emerald-300 transition-colors duration-300 flex items-center justify-center group">
+                <button
+                  className={[
+                    "w-full px-6 py-3",
+                    "bg-gradient-to-r from-purple-400 to-yellow-300",
+                    "text-blue-800 text-sm tracking-wider",
+                    "hover:bg-emerald-300",
+                    "transition-colors duration-300",
+                    "flex items-center justify-center group",
+                  ].join(" ")}
+                >
                   {plan.name === "Enterprise" ? "CONTACT SALES" : "START FREE TRIAL"}
-                  <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  <ChevronRight
+                    className={[
+                      "ml-2 w-4 h-4",
+                      "group-hover:translate-x-1",
+                      "transition-transform duration-300",
+                    ].join(" ")}
+                  />
                 </button>
               </div>
             ))}

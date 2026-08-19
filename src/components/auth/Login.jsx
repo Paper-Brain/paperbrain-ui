@@ -11,6 +11,7 @@ const Login = () => {
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,20 +31,22 @@ const Login = () => {
   };
 
    const handleOAuthLogin = async (provider) => {
-    // *** THIS IS THE FIX ***
     if (provider === "GitHub") {
       try {
         // Call the backend to generate oauth_state and get authorization URL
-        const response = await axios.get('https://localhost:8000/api/v1/auth/github/login', { withCredentials: true});
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000';
+        const response = await axios.get(`${apiBaseUrl}/api/v1/auth/github/login`, { withCredentials: true });
 
         // Redirect to GitHub OAuth with the generated URL
         window.location.href = response.data.authorization_url;
       } catch (error) {
-        console.error("Error during GitHub OAuth login:", error);
+        setErrorMessage("Error during GitHub OAuth login. Please try again.");
+        setTimeout(() => setErrorMessage(null), 5000);
       }
     } else {
       // Other providers can be handled here
-      alert(`Login with ${provider}`);
+      setErrorMessage(`Login with ${provider} is not yet implemented.`);
+      setTimeout(() => setErrorMessage(null), 5000);
     }
   };
 
@@ -73,6 +76,11 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center ">
       <div className="w-full max-w-5xl px-6 py-12 border border-white/10 backdrop-blur-md rounded-lg">
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-900/30 border border-red-500/50 text-red-300 rounded-md text-sm" role="alert">
+            {errorMessage}
+          </div>
+        )}
         <h2 className="text-3xl font-thin tracking-wide mb-8 text-center">
           Welcome Back
           {/* <span className="block mt-2 text-violet-400 text-lg font-light">
@@ -132,8 +140,12 @@ const Login = () => {
               </div>
               <button
                 type="submit"
-                className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
-              >
+                className={`
+                  group w-full relative px-12 py-4
+                  bg-gradient-to-r from-purple-400 to-yellow-300
+                  text-blue-800 text-sm tracking-wider
+                  transition-all duration-300
+                `}
                 LOGIN
                 <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
               </button>
@@ -170,8 +182,13 @@ const Login = () => {
                 <button
                   key={provider.name}
                   onClick={() => handleOAuthLogin(provider.name)}
-                  className={`group w-full px-6 py-4 rounded-md bg-gradient-to-r ${provider.color} border border-white/10 text-white text-sm tracking-wider transition-all duration-300 hover:scale-[1.02] flex items-center justify-between`}
-                >
+                  className={`
+                    group w-full px-6 py-4 rounded-md
+                    bg-gradient-to-r ${provider.color}
+                    border border-white/10 text-white text-sm tracking-wider
+                    transition-all duration-300 hover:scale-[1.02]
+                    flex items-center justify-between
+                  `}
                   <div className="flex items-center gap-3">
                     <span className="flex items-center justify-center w-5 h-5">
                       {provider.name === "Bitbucket" ? (

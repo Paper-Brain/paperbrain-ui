@@ -24,15 +24,20 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate async registration
-    setTimeout(() => {
-      setLoading(false);
-      alert("Registration successful");
+    try {
+      // Simulate async registration
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Use a non-blocking toast or modal notification instead of alert
+      // For now, we navigate directly; integrate a toast library like react-hot-toast
       navigate("/verify-account");
-    }, 2000);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -113,7 +118,8 @@ const Register = () => {
             </button>
           </div>
 
-          <button className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300">
+          <button
+            className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300"
             {loading ? "CREATING ACCOUNT..." : "REGISTER"}
             <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
           </button>
