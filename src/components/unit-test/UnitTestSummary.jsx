@@ -58,8 +58,29 @@ function TestResultsTable() {
 
 /** Download button with handler */
 function DownloadButton() {
-  const handleDownload = () => {
-    // TODO: Implement actual download logic (e.g., fetch blob, create object URL, trigger download)
+  const handleDownload = async () => {
+    try {
+      // Serialize test results to JSON; this data is not sensitive and safe to expose to the user.
+      const data = JSON.stringify(testResults, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary anchor element to trigger the download.
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "unit-test-results.json";
+      // Security: prevent the new page from accessing the opener.
+      anchor.rel = "noopener noreferrer";
+
+      // Append, click, and clean up.
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      // Log the error without leaking sensitive information.
+      console.error("Error downloading test results:", error);
+    }
   };
 
   return (

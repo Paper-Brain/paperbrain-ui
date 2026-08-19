@@ -99,7 +99,11 @@ const MobileOverlay = ({ isOpen, onClose }) => (
   )
 );
 
-const OrgDashboard = () => {
+/**
+ * Custom hook encapsulating all stateful logic for OrgDashboard.
+ * Improves readability, testability and adheres to the Single Responsibility Principle.
+ */
+const useOrgDashboard = () => {
   // 1. Authenticated user
   const { data: user } = useGetMeQuery();
   const currentUserId = user?.id;
@@ -127,13 +131,8 @@ const OrgDashboard = () => {
 
   // 5. Handle drag movement - wrapped in useCallback for stable reference
   const handleMove = useCallback((fromId, toId) => {
-    setWidgets((currentWidgets) => moveWidget(currentWidgets, fromId, toId));
+    setWidgets((current) => moveWidget(current, fromId, toId));
   }, []);
-
-  // Early return for error state
-  if (isOrgsError) {
-    return <OrganizationsError />;
-  }
 
   // Memoize sidebar props to prevent unnecessary re-renders
   const sidebarProps = useMemo(() => ({
@@ -155,6 +154,43 @@ const OrgDashboard = () => {
     isMobileMenuOpen,
     onToggleSidebar: () => setIsMobileMenuOpen((prev) => !prev),
   }), [user, selectedOrg, widgets, handleMove, isMobileMenuOpen]);
+
+  return {
+    isOrgsError,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+    sidebarProps,
+    contentProps,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    isCreateOrgOpen,
+    setIsCreateOrgOpen,
+    selectedOrg,
+  };
+};
+
+/**
+ * Thin wrapper component that delegates all logic to useOrgDashboard.
+ * This keeps the render layer simple and focused solely on UI composition.
+ */
+const OrgDashboard = () => {
+  const {
+    isOrgsError,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+    sidebarProps,
+    contentProps,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    isCreateOrgOpen,
+    setIsCreateOrgOpen,
+    selectedOrg,
+  } = useOrgDashboard();
+
+  // Early return for error state
+  if (isOrgsError) {
+    return <OrganizationsError />;
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">

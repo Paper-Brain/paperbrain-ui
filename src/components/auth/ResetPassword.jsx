@@ -8,6 +8,7 @@ const ResetPassword = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -21,11 +22,15 @@ const ResetPassword = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    handlePasswordReset();
+  };
+
+  const handlePasswordReset = () => {
     setLoading(true);
     // Simulate password reset
     setTimeout(() => {
       setLoading(false);
-      alert("Password reset successful");
+      setSuccessMessage("Password reset successful");
     }, 2000);
   };
 
@@ -93,7 +98,12 @@ const ResetPassword = () => {
 
           <button
             type="submit"
-            className="group w-full relative px-12 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 text-sm tracking-wider transition-all duration-300 mt-8"
+            className={
+              "group w-full relative px-12 py-4 " +
+              "bg-gradient-to-r from-purple-400 to-yellow-300 " +
+              "text-blue-800 text-sm tracking-wider " +
+              "transition-all duration-300 mt-8"
+            }
             disabled={loading}
           >
             {loading ? "RESETTING PASSWORD..." : "RESET PASSWORD"}

@@ -1,85 +1,97 @@
 // src/context/AuthContext.jsx
-import { createContext, useState, useContext, useEffect, useCallback } from 'react';
+// ============================================================
+// 1. CORE INFRASTRUCTURE - Stable references outside component
+// ============================================================
+import { createContext, useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { BASE_API_URL } from '../util/constants.js';
 
-// 1. Create the Context
 const AuthContext = createContext(null);
 
-// Axios instance with credentials for httpOnly cookie handling defined outside component
-// to prevent recreation on every render and simplify dependency trees.
+// Singleton axios instance with credentials for httpOnly cookie handling
 const api = axios.create({
   baseURL: BASE_API_URL,
-  withCredentials: true, // Critical: sends httpOnly cookies automatically
+  withCredentials: true,
 });
 
-// Helper to safely validate session
+// ============================================================
+// 2. PURE API FUNCTIONS - No React dependencies, testable in isolation
+// ============================================================
+
+/** Fetch authenticated user from session endpoint */
 const fetchSessionUser = async () => {
   const response = await api.get('/auth/me');
   return response.data;
 };
 
-// Helper to safely trigger backend logout
+/** Trigger backend logout to clear httpOnly cookie */
 const requestLogout = async () => {
   await api.post('/auth/logout');
 };
 
-// 2. Create the Provider Component
+// ============================================================
+// 3. CUSTOM HOOKS - Composable business logic units
+// ============================================================
+
+/** Manages session initialization with automatic cleanup */
+const useSessionInitialization = (setUser) => {
+  useEffect(() => {
+    let mounted = true;
+
+    const initializeSession = async () => {
+      try {
+        const userData = await fetchSessionUser();
+        if (mounted) setUser(userData);
+      } catch {
+        if (mounted) setUser(null);
+      }
+    };
+
+    initializeSession();
+    return () => { mounted = false; };
+  }, [setUser]);
+};
+
+/** Creates stable login handler */
+const useLoginHandler = (setUser) => {
+  return useCallback(
+    (userData) => setUser(userData),
+    [setUser]
+  );
+};
+
+/** Creates logout handler with graceful failure tolerance */
+const useLogoutHandler = (setUser) => {
+  return useCallback(async () => {
+    try {
+      await requestLogout();
+    } catch {
+      // Swallow network errors—local state must clear regardless
+    } finally {
+      setUser(null);
+    }
+  }, [setUser]);
+};
+
+// ============================================================
+// 4. PROVIDER COMPONENT - Orchestration layer only
+// ============================================================
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Login: backend sets httpOnly cookie; we only receive user data
-  const login = useCallback((userData) => {
-    setUser(userData);
-  }, []);
+  const login = useLoginHandler(setUser);
+  const logout = useLogoutHandler(setUser);
 
-  // Logout: call backend to clear httpOnly cookie, then clear local state
-  const logout = useCallback(async () => {
-    try {
-      await requestLogout();
-    } catch {
-      // Silent catch to prevent blocking local logout on network failure
-    } finally {
-      setUser(null);
-    }
-  }, []);
+  useSessionInitialization(setUser);
 
-  // Validate session on mount using cookie-based auth
-  useEffect(() => {
-    let mounted = true;
-
-    const validateSession = async () => {
-      try {
-        const userData = await fetchSessionUser();
-        if (mounted) {
-          setUser(userData);
-        }
-      } catch {
-        if (mounted) {
-          setUser(null);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    validateSession();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const contextValue = {
-    user,
-    loading,
-    login,
-    logout,
-    isAuthenticated: !!user,
-  };
+  // Derive computed values from state
+  const isAuthenticated = useMemo(() => !!user, [user]);
+  const contextValue = useMemo(
+    () => ({ user, loading, login, logout, isAuthenticated }),
+    [user, loading, login, logout, isAuthenticated]
+  );
 
   if (loading) {
     return <div role="status" aria-live="polite">Loading user session...</div>;

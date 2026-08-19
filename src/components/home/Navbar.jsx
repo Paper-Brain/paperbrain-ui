@@ -1,158 +1,177 @@
 import { useState, useEffect } from "react";
-import { EllipsisVertical, Loader, X } from "lucide-react";
+import { EllipsisVertical, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useGetMeQuery } from '../../api/authApi.js'; 
-import UserDropdown from '../auth/UserDropdown.jsx'; 
-import UserAvatar from '../auth/Avatar.jsx'; 
+import { useGetMeQuery } from '../../api/authApi.js';
+import UserDropdown from '../auth/UserDropdown.jsx';
+import UserAvatar from '../auth/Avatar.jsx';
+
+// Extracted constants for better maintainability
+const NAV_ITEMS = ["FEATURES", "SOLUTIONS", "ENTERPRISE", "PRICING"];
+
+const NAV_LINK_CLASSES =
+  "text-sm font-extralight tracking-widest hover:text-violet-400 " +
+  "transition-colors duration-300 relative group";
+
+const NAV_UNDERLINE_CLASSES =
+  "absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r " +
+  "from-purple-400 to-yellow-300 transition-all duration-300 group-hover:w-full";
+
+const GET_ACCESS_LABEL_CLASSES =
+  "relative z-10 text-sm tracking-widest font-extralight " +
+  "transition-colors duration-300 group-hover:text-black";
+
+const GET_ACCESS_HOVER_CLASSES =
+  "absolute inset-0 bg-gradient-to-r from-purple-400 to-yellow-300 " +
+  "text-blue-800 translate-y-full transition-transform duration-300 " +
+  "group-hover:translate-y-0";
+
+// Sub-components for better separation of concerns
+const NavLink = ({ item }) => (
+  <a
+    key={item}
+    href={item.toLowerCase()}
+    className={NAV_LINK_CLASSES}
+  >
+    {item}
+    <span className={NAV_UNDERLINE_CLASSES} />
+  </a>
+);
+
+const MobileNavLink = ({ item, onClick }) => (
+  <a
+    key={item}
+    onClick={onClick}
+    href={item.toLowerCase()}
+    className="block text-sm tracking-widest font-extralight " +
+      "hover:text-violet-400 transition-colors duration-300"
+  >
+    {item}
+  </a>
+);
+
+const GetAccessButton = ({ onClick, fullWidth = false }) => (
+  <button
+    onClick={onClick}
+    className={`relative px-8 py-3 overflow-hidden group bg-transparent ${
+      fullWidth ? "w-full text-left mt-4" : ""
+    }`}
+  >
+    <span className={GET_ACCESS_LABEL_CLASSES}>GET ACCESS</span>
+    <span className={GET_ACCESS_HOVER_CLASSES} />
+  </button>
+);
+
+const UserSection = ({ user, isDropdownOpen, setIsDropdownOpen }) => (
+  <div
+    className="relative flex items-center justify-center"
+    onMouseEnter={() => setIsDropdownOpen(true)}
+    onMouseLeave={() => setIsDropdownOpen(false)}
+  >
+    <UserAvatar
+      user={user}
+      sizeClass="w-10 h-10 cursor-pointer"
+    />
+    {isDropdownOpen && <UserDropdown />}
+  </div>
+);
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  // 3. Fetch user data from the global RTK cache
-  const { data: user, isSuccess, isLoading } = useGetMeQuery();
-  const isAuthenticated = isSuccess && !!user; 
+
+  const { data: user, isSuccess } = useGetMeQuery();
+  const isAuthenticated = isSuccess && !!user;
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
 
-    // The mouse move listener is not directly used for the navbar functionality
-    // but is kept for consistency with your original code.
-    const handleMouseMove = (e) => {
-      // Original logic for mouse position, kept for continuity
-    };
-
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleGetAccess = () => {
     navigate("/login");
   };
 
-  // Skip rendering the user section if data is still loading
-  if (isLoading) {
-    // <Loader />; 
-  }
+  const handleMobileMenuClose = () => {
+    setIsMenuOpen(false);
+  };
+
+  const navClasses = scrolled
+    ? "bg-black/80 backdrop-blur-md"
+    : "bg-transparent";
 
   return (
-    <>
-      <nav
-        className={`fixed w-full z-50 transition-all duration-500 ${
-          scrolled ? "bg-black/80 backdrop-blur-md" : "bg-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between h-24 items-center">
-            
-            {/* Logo */}
-            <div className="flex items-center">
-              <a href="/">
-                <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
-                  PaperBrain<span className="text-violet-400">°</span>
-                </span>
-              </a>
-            </div>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${navClasses}`}>
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex justify-between h-24 items-center">
+          {/* Logo */}
+          <div className="flex items-center">
+            <a href="/">
+              <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
+                PaperBrain<span className="text-violet-400">°</span>
+              </span>
+            </a>
+          </div>
 
-            {/* Desktop Navigation & Auth Check */}
-            <div className="hidden md:flex items-center space-x-12">
-              {["FEATURES", "SOLUTIONS", "ENTERPRISE", "PRICING"].map(
-                (item) => (
-                  <a
-                    key={item}
-                    href={`${item.toLowerCase()}`}
-                    className="text-sm font-extralight tracking-widest hover:text-violet-400 transition-colors duration-300 relative group"
-                  >
-                    {item}
-                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-purple-400 to-yellow-300 transition-all duration-300 group-hover:w-full" />
-                  </a>
-                )
-              )}
-              
-              {/* 4. Conditional Rendering: Avatar or Get Access */}
-              {isAuthenticated ? (
-                // If authenticated: Show Avatar with Dropdown on hover
-                <div 
-                  className="relative flex items-center justify-center"
-                  onMouseEnter={() => setIsDropdownOpen(true)}
-                  onMouseLeave={() => setIsDropdownOpen(false)}
-                >
-                  <UserAvatar 
-                    user={user} 
-                    sizeClass="w-10 h-10 cursor-pointer " 
-                  />
-                  {isDropdownOpen && <UserDropdown/>}
-                </div>
+          {/* Desktop Navigation & Auth Check */}
+          <div className="hidden md:flex items-center space-x-12">
+            {NAV_ITEMS.map((item) => (
+              <NavLink key={item} item={item} />
+            ))}
+
+            {isAuthenticated ? (
+              <UserSection
+                user={user}
+                isDropdownOpen={isDropdownOpen}
+                setIsDropdownOpen={setIsDropdownOpen}
+              />
+            ) : (
+              <GetAccessButton onClick={handleGetAccess} />
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? (
+                <X className="w-6 h-6 text-white" />
               ) : (
-                // If NOT authenticated: Show GET ACCESS button
-                <button
-                  onClick={handleGetAccess}
-                  className="relative px-8 py-3 overflow-hidden group bg-transparent"
-                >
-                  <span className="relative z-10 text-sm tracking-widest font-extralight transition-colors duration-300 group-hover:text-black">
-                    GET ACCESS
-                  </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 translate-y-full transition-transform duration-300 group-hover:translate-y-0" />
-                </button>
+                <EllipsisVertical className="w-6 h-6 text-white" />
               )}
-            </div>
-
-            {/* Mobile Menu Toggle */}
-            <div className="md:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                {isMenuOpen ? (
-                  <X className="w-6 h-6 text-white" /> // Changed to X icon for better UX
-                ) : (
-                  <EllipsisVertical className="w-6 h-6 text-white" />
-                )}
-              </button>
-            </div>
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu Content */}
-        {isMenuOpen && (
-          <div className="md:hidden min-h-screen bg-black/80 backdrop-blur-md border-b border-white/5">
-            <div className="px-6 py-8 space-y-6">
-              {["FEATURES", "SOLUTIONS", "ENTERPRISE", "PRICING"].map(
-                (item) => (
-                  <a
-                    key={item}
-                    onClick={() => setIsMenuOpen(false)} // Close menu on click
-                    href={`${item.toLowerCase()}`}
-                    className="block text-sm tracking-widest font-extralight hover:text-violet-400 transition-colors duration-300"
-                  >
-                    {item}
-                  </a>
-                )
-              )}
-              {/* 5. Conditional Rendering: Show GET ACCESS in mobile menu if not authenticated */}
-              {!isAuthenticated && (
-                <button
-                  onClick={() => {
-                    handleGetAccess;
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full relative px-8 py-3 mt-4 overflow-hidden group bg-transparent text-left"
-                >
-                   <span className="relative z-10 text-sm tracking-widest font-extralight transition-colors duration-300 group-hover:text-black">
-                    GET ACCESS
-                  </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 transition-transform duration-300 translate-y-full group-hover:translate-y-0" />
-                </button>
-              )}
-            </div>
+      {/* Mobile Menu Content */}
+      {isMenuOpen && (
+        <div className="md:hidden min-h-screen bg-black/80 backdrop-blur-md border-b border-white/5">
+          <div className="px-6 py-8 space-y-6">
+            {NAV_ITEMS.map((item) => (
+              <MobileNavLink
+                key={item}
+                item={item}
+                onClick={handleMobileMenuClose}
+              />
+            ))}
+            {!isAuthenticated && (
+              <GetAccessButton
+                onClick={() => {
+                  handleGetAccess();
+                  setIsMenuOpen(false);
+                }}
+                fullWidth
+              />
+            )}
           </div>
-        )}
-      </nav>
-    </>
+        </div>
+      )}
+    </nav>
   );
 };
 

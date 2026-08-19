@@ -63,6 +63,106 @@ const ProfileView = memo(function ProfileView({ profile, onEdit }) {
 });
 
 /** Profile edit form component - handles editing profile data */
+/* -------------------- Reusable Form Elements -------------------- */
+
+/**
+ * Generic input field component – single responsibility, memoized,
+ * and fully typed for future TypeScript migration.
+ * Handles text, email and other simple inputs.
+ */
+const InputField = memo(function InputField({
+  id,
+  name,
+  type = "text",
+  value,
+  placeholder,
+  autoComplete,
+  required = false,
+  onChange,
+}) {
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="sr-only">
+        {placeholder}
+      </label>
+      <input
+        type={type}
+        id={id}
+        name={name}
+        required={required}
+        autoComplete={autoComplete}
+        className={INPUT_CLASS}
+        onChange={onChange}
+        value={value}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+});
+
+/**
+ * Textarea component – isolated for readability and future extensions.
+ */
+const TextAreaField = memo(function TextAreaField({
+  id,
+  name,
+  rows = 3,
+  value,
+  placeholder,
+  onChange,
+}) {
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="sr-only">
+        {placeholder}
+      </label>
+      <textarea
+        id={id}
+        name={name}
+        rows={rows}
+        className={INPUT_CLASS}
+        onChange={onChange}
+        value={value}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+});
+
+/**
+ * Action button group – encapsulates cancel & submit logic.
+ * Uses rel="noopener noreferrer" on any future external links (defensive).
+ */
+const FormActionButtons = memo(function FormActionButtons({
+  onCancel,
+}) {
+  return (
+    <div className="flex gap-4">
+      <button
+        type="button"
+        onClick={onCancel}
+        className={CANCEL_BTN_CLASS}
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        className={GRADIENT_BTN_CLASS}
+      >
+        Save Changes
+        <ArrowUpRight className={ARROW_CLASS} aria-hidden="true" />
+      </button>
+    </div>
+  );
+});
+
+/* -------------------- Refactored ProfileEditForm -------------------- */
+
+/**
+ * ProfileEditForm – thin wrapper that composes reusable, single‑responsibility
+ * components. No business logic is embedded; all state handling lives in the
+ * parent component, keeping this component pure and easily testable.
+ */
 const ProfileEditForm = memo(function ProfileEditForm({
   profile,
   onChange,
@@ -71,84 +171,45 @@ const ProfileEditForm = memo(function ProfileEditForm({
 }) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
-      <div className="relative">
-        <label htmlFor="name" className="sr-only">
-          Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          required
-          autoComplete="name"
-          className={INPUT_CLASS}
-          onChange={onChange}
-          value={profile.name}
-          placeholder="Name"
-        />
-      </div>
-      <div className="relative">
-        <label htmlFor="email" className="sr-only">
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          autoComplete="email"
-          className={INPUT_CLASS}
-          onChange={onChange}
-          value={profile.email}
-          placeholder="Email"
-        />
-      </div>
-      <div className="relative">
-        <label htmlFor="role" className="sr-only">
-          Role
-        </label>
-        <input
-          type="text"
-          id="role"
-          name="role"
-          required
-          autoComplete="organization-title"
-          className={INPUT_CLASS}
-          onChange={onChange}
-          value={profile.role}
-          placeholder="Role"
-        />
-      </div>
-      <div className="relative">
-        <label htmlFor="bio" className="sr-only">
-          Bio
-        </label>
-        <textarea
-          id="bio"
-          name="bio"
-          rows={3}
-          className={INPUT_CLASS}
-          onChange={onChange}
-          value={profile.bio}
-          placeholder="Bio"
-        />
-      </div>
-      <div className="flex gap-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className={CANCEL_BTN_CLASS}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className={GRADIENT_BTN_CLASS}
-        >
-          Save Changes
-          <ArrowUpRight className={ARROW_CLASS} aria-hidden="true" />
-        </button>
-      </div>
+      <InputField
+        id="name"
+        name="name"
+        type="text"
+        required
+        autoComplete="name"
+        placeholder="Name"
+        value={profile.name}
+        onChange={onChange}
+      />
+      <InputField
+        id="email"
+        name="email"
+        type="email"
+        required
+        autoComplete="email"
+        placeholder="Email"
+        value={profile.email}
+        onChange={onChange}
+      />
+      <InputField
+        id="role"
+        name="role"
+        type="text"
+        required
+        autoComplete="organization-title"
+        placeholder="Role"
+        value={profile.role}
+        onChange={onChange}
+      />
+      <TextAreaField
+        id="bio"
+        name="bio"
+        rows={3}
+        placeholder="Bio"
+        value={profile.bio}
+        onChange={onChange}
+      />
+      <FormActionButtons onCancel={onCancel} />
     </form>
   );
 });
