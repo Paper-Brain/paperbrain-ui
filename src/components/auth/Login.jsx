@@ -34,7 +34,13 @@ const Login = () => {
     if (provider === "GitHub") {
       try {
         // Call the backend to generate oauth_state and get authorization URL
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000';
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+        if (!apiBaseUrl) {
+          console.error("CRITICAL: VITE_API_BASE_URL is not defined. Please configure your environment variables.");
+          setErrorMessage("Application configuration error. Please try again later.");
+          setTimeout(() => setErrorMessage(null), 5000);
+          return; // Stop execution if critical configuration is missing
+        }
         const response = await axios.get(`${apiBaseUrl}/api/v1/auth/github/login`, { withCredentials: true });
 
         // Redirect to GitHub OAuth with the generated URL

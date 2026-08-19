@@ -148,9 +148,47 @@ const CreateProject = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement project creation logic
+
+    // Basic client‑side validation
+    if (!formData.projectName.trim()) {
+      alert("Project name is required.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token":
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ||
+            "",
+        },
+        body: JSON.stringify({
+          name: formData.projectName.trim(),
+          description: formData.description.trim(),
+          visibility: formData.visibility,
+        }),
+        credentials: "same-origin",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData.message || "Failed to create project.";
+        console.error("Project creation error:", message);
+        alert(message);
+        return;
+      }
+
+      const result = await response.json();
+      // Redirect to the newly created project's page
+      window.location.href = `/projects/${encodeURIComponent(result.id)}`;
+    } catch (err) {
+      console.error("Network error while creating project:", err);
+      alert("An unexpected error occurred. Please try again later.");
+    }
   };
 
   return (

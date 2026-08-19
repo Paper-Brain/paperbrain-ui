@@ -62,17 +62,67 @@ const InputField = ({ label, name, type, value, onChange, placeholder, icon: Ico
         </button>
       ) : (
         <Icon className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-      )}
-    </div>
-  </div>
-);
-
-const AccountSettings = () => {
+const useAccountSettingsForm = () => {
   const [settings, setSettings] = useState({
-    fullName: "John Doe",
-    email: "john.doe@example.com",
+    fullName: "",
+    email: "",
     password: "",
     notifications: true,
+    twoFactor: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  const handleInputChange = useCallback((e) => {
+    const { name, type, value, checked } = e.target;
+    setSettings((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  }, []);
+
+  const validateForm = useCallback(() => {
+    if (!settings.fullName.trim()) return "Full name is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.email)) return "Valid email is required.";
+    if (settings.password && settings.password.length < 8) return "Password must be at least 8 characters.";
+    return null;
+  }, [settings]);
+
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    const error = validateForm();
+    if (error) {
+      setMessage({ type: "error", text: error });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setMessage({ type: "success", text: "Settings updated successfully" });
+      // Clear password field after success
+      setSettings((prev) => ({ ...prev, password: "" }));
+    } catch (err) {
+      setMessage({ type: "error", text: "Failed to update settings. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  }, [validateForm]);
+
+  return {
+    settings,
+    loading,
+    showPassword,
+    message,
+    handleInputChange,
+    handleSubmit,
+    setShowPassword,
+  };
+};
     twoFactor: false,
   });
 
