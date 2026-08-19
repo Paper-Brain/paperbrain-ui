@@ -1,69 +1,81 @@
 // src/context/AuthContext.jsx
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_API_URL } from '../util/constants.js';
+
 // 1. Create the Context
 const AuthContext = createContext(null);
 
-// Optional: Define a function to retrieve the user's token (e.g., from localStorage)
-const getAuthToken = () => localStorage.getItem('authToken');
-
 // 2. Create the Provider Component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Holds the user object
-  const [loading, setLoading] = useState(true); // To prevent rendering before check
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // This function would be called after a successful OAuth redirect/callback
-  const login = (userData, token) => {
+  // Axios instance with credentials for httpOnly cookie handling
+  const api = axios.create({
+    baseURL: BASE_API_URL,
+    withCredentials: true, // Critical: sends httpOnly cookies automatically
+  });
+
+  // Login: backend sets httpOnly cookie; we only receive user data
+  const login = useCallback((userData) => {
     setUser(userData);
-    localStorage.setItem('authToken', token); // Store the token for future requests
-  };
+  }, []);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('authToken');
-    // Optional: Redirect to login page
-  };
+  // Logout: call backend to clear httpOnly cookie, then clear local state
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Log but don't block local logout on network failure
+      console.warn('Logout request failed, clearing local session:', error.message);
+    } finally {
+      setUser(null);
+    }
+  }, [api]);
 
-  // Logic to validate token and fetch user on application load
+  // Validate session on mount using cookie-based auth
   useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      // In a real app, you would hit your backend's /api/v1/auth/me endpoint
-      // to validate the token and get the latest user data.
-      const validateUser = async () => {
-        try {
-          // Replace with your actual validation endpoint
-          const response = await axios.get(`${BASE_API_URL}/auth/me`, { 
-            headers: { 
-              Authorization: `Bearer ${token}` 
-            }
-          });
+    let mounted = true;
+
+    const validateSession = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        if (mounted) {
           setUser(response.data);
-        } catch (error) {
-          console.error("Token validation failed:", error);
-          logout(); // Clear bad token
-        } finally {
+        }
+      } catch (error) {
+        // 401/403 = no valid session; treat as unauthenticated (no error log)
+        if (error.response?.status !== 401 && error.response?.status !== 403) {
+          console.error('Session validation error:', error.message);
+        }
+        if (mounted) {
+          setUser(null);
+        }
+      } finally {
+        if (mounted) {
           setLoading(false);
         }
-      };
-      validateUser();
-    } else {
-      setLoading(false);
-    }
-  }, []);
+      }
+    };
+
+    validateSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [api]);
 
   const contextValue = {
     user,
     loading,
     login,
     logout,
-    isAuthenticated: !!user, // Helper boolean
+    isAuthenticated: !!user,
   };
 
-  // If you are loading, you might want to show a spinner here
   if (loading) {
-    return <div>Loading user session...</div>;
+    return <div role="status" aria-live="polite">Loading user session...</div>;
   }
 
   return (
@@ -75,5 +87,9 @@ export const AuthProvider = ({ children }) => {
 
 // 3. Custom Hook for easy consumption
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
