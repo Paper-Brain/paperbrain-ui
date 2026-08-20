@@ -15,7 +15,13 @@ const CLASSES = {
   navLink: "text-sm font-extralight tracking-widest hover:text-violet-400 transition-colors duration-300 relative group",
   navUnderline: "absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-purple-400 to-yellow-300 transition-all duration-300 group-hover:w-full",
   getAccessLabel: "relative z-10 text-sm tracking-widest font-extralight transition-colors duration-300 group-hover:text-black",
-  getAccessHover: "absolute inset-0 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 translate-y-full transition-transform duration-300 group-hover:translate-y-0",
+    getAccessHover: [
+      "absolute inset-0",
+      "bg-gradient-to-r from-purple-400 to-yellow-300",
+      "text-blue-800",
+      "translate-y-full transition-transform duration-300",
+      "group-hover:translate-y-0"
+    ].join(" "),
   mobileNavLink: "block text-sm tracking-widest font-extralight hover:text-violet-400 transition-colors duration-300",
   navScrolled: "bg-black/80 backdrop-blur-md",
   navTransparent: "bg-transparent",

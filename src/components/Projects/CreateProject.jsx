@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Globe, Lock, X } from "lucide-react";
+import React, { useState, useCallback } from "react";
+import { Plus, Globe, Lock } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const inputBaseClasses =
   "w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm";
@@ -133,88 +134,103 @@ const CreateProjectButton = () => (
   </button>
 );
 
-const CreateProject = () => {
+/* Helper utilities – extracted for single‑responsibility and testability */
+const getCsrfToken = () => {
+  const token = document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute("content");
+  return token ?? "";
+};
+
+const validateForm = (data) => {
+  if (!data.projectName.trim()) {
+    return { valid: false, message: "Project name is required." };
+  }
+  return { valid: true };
+};
+
+const buildRequestPayload = (data) => ({
+  name: data.projectName.trim(),
+  description: data.description.trim(),
+  visibility: data.visibility,
+});
+
+const submitProject = async (payload) => {
+  const response = await fetch("/api/projects", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": getCsrfToken(),
+    },
+    body: JSON.stringify(payload),
+    credentials: "same-origin",
+  });
+  return response;
+};
+
+const handleApiResponse = async (response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.message || "Failed to create project.";
+    return { success: false, error: message };
+  }
+  const result = await response.json();
+  return { success: true, data: result };
+};
+
+const redirectToProject = (projectId) => {
+  window.location.href = `/projects/${encodeURIComponent(projectId)}`;
+};
+
+/* Hook: encapsulates form state and submission logic – single responsibility */
+const useCreateProjectForm = () => {
   const [formData, setFormData] = useState({
     projectName: "",
     description: "",
     visibility: "private",
   });
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const getCsrfToken = () => {
-    return document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "";
-  };
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-  const validateForm = (data) => {
-    if (!data.projectName.trim()) {
-      return { valid: false, message: "Project name is required." };
-    }
-    return { valid: true };
-  };
-
-  const buildRequestPayload = (data) => ({
-    name: data.projectName.trim(),
-    description: data.description.trim(),
-    visibility: data.visibility,
-  });
-
-  const submitProject = async (payload) => {
-    const response = await fetch("/api/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": getCsrfToken(),
-      },
-      body: JSON.stringify(payload),
-      credentials: "same-origin",
-    });
-    return response;
-  };
-
-  const handleApiResponse = async (response) => {
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const message = errorData.message || "Failed to create project.";
-      return { success: false, error: message };
-    }
-    const result = await response.json();
-    return { success: true, data: result };
-  };
-
-  const redirectToProject = (projectId) => {
-    window.location.href = `/projects/${encodeURIComponent(projectId)}`;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validation = validateForm(formData);
-    if (!validation.valid) {
-      alert(validation.message);
-      return;
-    }
-
-    try {
-      const response = await submitProject(buildRequestPayload(formData));
-      const result = await handleApiResponse(response);
-
-      if (!result.success) {
-        alert(result.error);
+      const validation = validateForm(formData);
+      if (!validation.valid) {
+        toast.error(validation.message);
         return;
       }
 
-      redirectToProject(result.data.id);
-    } catch (err) {
-      alert("An unexpected error occurred. Please try again later.");
-    }
-  };
+      try {
+        const response = await submitProject(buildRequestPayload(formData));
+        const result = await handleApiResponse(response);
+
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
+
+        toast.success("Project created successfully.");
+        redirectToProject(result.data.id);
+      } catch (err) {
+        toast.error(
+          "An unexpected error occurred. Please try again later."
+        );
+      }
+    },
+    [formData]
+  );
+
+  return { formData, handleChange, handleSubmit };
+};
+
+/* Main component – thin UI layer */
+const CreateProject = () => {
+  const { formData, handleChange, handleSubmit } = useCreateProjectForm();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center p-4">

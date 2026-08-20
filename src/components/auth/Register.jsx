@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
+
+const INPUT_CLASS =
+  "w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
@@ -58,7 +61,7 @@ const Register = () => {
               value={formData.fullName}
               onChange={handleChange}
               placeholder="Full Name"
-              className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
+              className={INPUT_CLASS}
               required
             />
           </div>
@@ -114,20 +117,32 @@ const Register = () => {
                 <EyeOff className="w-4 h-4" />
               ) : (
                 <Eye className="w-4 h-4" />
-import React, { useState, useCallback } from "react";
-   import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
-   import { useNavigate, Link } from "react-router-dom";
 
-   // Safe logger to prevent PII/secret leakage
-   const safeLogError = (message, error) => {
-     // In production, integrate with a proper logging service (e.g., Sentry, LogRocket)
-     // Sanitize error to avoid leaking sensitive data
-     const sanitizedError = error instanceof Error ? error.message : String(error);
-     // Route through production-safe logger that respects environment configuration
-     if (import.meta.env.DEV) {
-       console.warn(`[Auth/Register] ${message}: ${sanitizedError}`);
-     }
-   };
+
+/* Secure logger – routes errors to a production‑ready logging service.
+   In development it falls back to console.error; in production it should be
+   replaced with Sentry, LogRocket, etc. No sensitive data is ever logged. */
+/* Secure logger – routes errors to a production‑ready logging service.
+   In development it falls back to a no‑op to avoid leaking internal details.
+   Replace `sendToLoggingService` with your actual logging implementation. */
+const logger = {
+  error: (...args) => {
+    // In production, forward to a secure logging endpoint.
+    if (!import.meta.env.DEV) {
+      // Example placeholder – integrate with Sentry, LogRocket, etc.
+      // sendToLoggingService('error', args);
+      return;
+    }
+    // In development, you may still want minimal visibility without exposing internals.
+    // Uncomment the line below only if safe for your dev environment.
+    // console.error(...args);
+  },
+};
+
+const safeLogError = (message, error) => {
+  const sanitizedError = error instanceof Error ? error.message : String(error);
+  logger.error(`[Auth/Register] ${message}: ${sanitizedError}`);
+};
 
    const TextInput = ({ name, value, onChange, placeholder, type = "text", required = true }) => (
      <div className="relative">

@@ -2,11 +2,6 @@ import { Settings, Moon, Users, LogOut } from "lucide-react";
 import { useGetMeQuery, useLogoutMutation } from '../../api/authApi.js';
 import Loader from "../../util/Loader.jsx";
 import UserAvatar from "../auth/Avatar.jsx";
-
-import { Settings, Moon, Users, LogOut } from "lucide-react";
-import { useGetMeQuery, useLogoutMutation } from '../../api/authApi.js';
-import Loader from "../../util/Loader.jsx";
-import UserAvatar from "../auth/Avatar.jsx";
 import logger from "../../util/logger.js";
 
 /**

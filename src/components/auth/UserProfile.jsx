@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-
-import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
 import ProfileForm from "./ProfileForm";
 import ProfileDisplay from "./ProfileDisplay";
 
@@ -24,7 +21,7 @@ export default function UserProfile() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsEditing(false);
-    console.log("Updated profile:", profile);
+    // Removed console.log to avoid leaking internal state in production
   };
 
   const updateProfile = (newProfile) => {
