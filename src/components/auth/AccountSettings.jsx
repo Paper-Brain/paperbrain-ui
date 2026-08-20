@@ -161,14 +161,7 @@ const useAccountSettingsValues = () => {
 
 const AccountSettings = () => {
   // All UI state and actions are obtained from a single, well‑named hook.
-  const {
-    settings,
-    loading,
-    showPassword,
-    togglePasswordVisibility,
-    handleInputChange,
-    handleSubmit,
-  } = useAccountSettingsValues();
+  const accountSettingsProps = useAccountSettingsValues();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center">
@@ -180,14 +173,7 @@ const AccountSettings = () => {
           </span>
         </h2>
 
-        <AccountSettingsForm
-          settings={settings}
-          loading={loading}
-          showPassword={showPassword}
-          togglePasswordVisibility={togglePasswordVisibility}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-        />
+        <AccountSettingsForm {...accountSettingsProps} />
       </div>
     </div>
   );

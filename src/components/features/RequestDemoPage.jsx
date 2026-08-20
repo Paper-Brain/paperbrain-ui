@@ -145,49 +145,74 @@ const DemoFormFields = () => (
   </>
 );
 
-/* Main component – split into small, testable pieces */
+/* ---------- Hook: encapsulates form state & submission logic ---------- */
+import { useCallback, useState } from "react";
+
+/**
+ * useDemoForm – custom hook that isolates validation, API interaction,
+ * and status management from the UI component.
+ *
+ * Returns:
+ *   status   – { loading: boolean, error: string|null, success: boolean }
+ *   handleSubmit – event handler for the <form> element
+ */
+function useDemoForm() {
+  const [status, setStatus] = useState({
+    loading: false,
+    error: null,
+    success: false,
+  });
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get("name")?.trim() ?? "",
+        email: formData.get("email")?.trim() ?? "",
+        company: formData.get("company")?.trim() ?? "",
+        message: formData.get("message")?.trim() ?? "",
+      };
+
+      // ---------- Client‑side validation ----------
+      const validationErrors = validateFormData(data);
+      if (hasErrors(validationErrors)) {
+        setStatus({
+          loading: false,
+          error: Object.values(validationErrors)[0],
+          success: false,
+        });
+        return;
+      }
+
+      setStatus({ loading: true, error: null, success: false });
+
+      // ---------- API submission ----------
+      try {
+        await submitDemoRequest(data);
+        setStatus({ loading: false, error: null, success: true });
+        form.reset();
+      } catch (err) {
+        // Safe logging – never expose PII or stack traces to the client
+
+        setStatus({
+          loading: false,
+          error: "Failed to submit. Please try again later.",
+          success: false,
+        });
+      }
+    },
+    [] // dependencies are static; hook is self‑contained
+  );
+
+  return { status, handleSubmit };
+}
+
+/* ---------- Main component – thin UI layer ---------- */
 const RequestDemo = () => {
-  const [status, setStatus] = useState({ loading: false, error: null, success: false });
-
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = {
-      name: formData.get("name")?.trim() ?? "",
-      email: formData.get("email")?.trim() ?? "",
-      company: formData.get("company")?.trim() ?? "",
-      message: formData.get("message")?.trim() ?? "",
-    };
-
-    // Client-side validation
-    const validationErrors = validateFormData(data);
-    if (hasErrors(validationErrors)) {
-      setStatus({
-        loading: false,
-        error: Object.values(validationErrors)[0],
-        success: false,
-      });
-      return;
-    }
-
-    setStatus({ loading: true, error: null, success: false });
-
-    try {
-      await submitDemoRequest(data);
-      setStatus({ loading: false, error: null, success: true });
-      form.reset();
-    } catch (err) {
-      // Safe logging - no PII or stack traces exposed to client
-      logger.error("Demo request submission failed", { error: err.message });
-      setStatus({
-        loading: false,
-        error: "Failed to submit. Please try again later.",
-        success: false,
-      });
-    }
-  }, []);
+  const { status, handleSubmit } = useDemoForm();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center">
