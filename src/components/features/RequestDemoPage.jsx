@@ -146,7 +146,7 @@ const DemoFormFields = () => (
 );
 
 /* ---------- Hook: encapsulates form state & submission logic ---------- */
-import { useCallback, useState } from "react";
+
 
 /**
  * useDemoForm – custom hook that isolates validation, API interaction,
@@ -211,6 +211,16 @@ function useDemoForm() {
 }
 
 /* ---------- Main component – thin UI layer ---------- */
+const DemoForm = ({ onSubmit, status }) => (
+  <form className="space-y-6" onSubmit={onSubmit} noValidate>
+    <DemoFormFields />
+    <StatusMessage status={status} />
+    <SubmitButton loading={status.loading}>
+      {status.loading ? "Sending…" : "REQUEST DEMO"}
+    </SubmitButton>
+  </form>
+);
+
 const RequestDemo = () => {
   const { status, handleSubmit } = useDemoForm();
 
@@ -224,13 +234,7 @@ const RequestDemo = () => {
           </span>
         </h2>
 
-        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
-          <DemoFormFields />
-          <StatusMessage status={status} />
-          <SubmitButton loading={status.loading}>
-            {status.loading ? "Sending…" : "REQUEST DEMO"}
-          </SubmitButton>
-        </form>
+        <DemoForm onSubmit={handleSubmit} status={status} />
       </div>
     </div>
   );

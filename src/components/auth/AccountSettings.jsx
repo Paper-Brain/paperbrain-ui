@@ -157,8 +157,6 @@ const useAccountSettingsValues = () => {
     ...accountState,
     togglePasswordVisibility,
   };
-};
-
 const AccountSettings = () => {
   // All UI state and actions are obtained from a single, well‑named hook.
   const accountSettingsProps = useAccountSettingsValues();
@@ -168,6 +166,7 @@ const AccountSettings = () => {
       <div className="w-full max-w-md px-4 py-12 mt-20 mb-12 border border-white/10 backdrop-blur-md rounded-lg shadow-xl">
         <h2 className="text-3xl font-thin tracking-wide mb-8 text-center">
           Account Settings
+
           <span className="block mt-2 text-violet-400 text-lg font-light">
             Manage your account preferences
           </span>
