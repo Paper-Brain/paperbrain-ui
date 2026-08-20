@@ -1,4 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+// Safe logger to prevent PII/sensitive data leakage in production
+const safeLogError = (context, error) => {
+  if (process.env.NODE_ENV === "development") {
+    console.warn(`[${context}] Error occurred:`, error?.message || error);
+  }
+};
+
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Building2, ArrowUpRight } from "lucide-react";
 import { SLUG_IRL } from "../../util/constants";
 import { useGetMeQuery } from "../../api/authApi.js";
@@ -17,17 +24,92 @@ function slugify(text) {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/[^\w-]+/g, "")
-    .replace(/--+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
-}
-
 const CreateOrg = () => {
-  const [orgName, setOrgName] = useState("");
-  const [orgSlug, setOrgSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [isAvailable, setIsAvailable] = useState(null);
+  const useOrganizationForm = () => {
+    const [orgName, setOrgName] = useState("");
+    const [orgSlug, setOrgSlug] = useState("");
+    const [description, setDescription] = useState("");
+    const [isAvailable, setIsAvailable] = useState(null);
+    const [isChecking, setIsChecking] = useState(false);
 
+    // ... (rest of the code)
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleCreateOrg} className="space-y-4">
+        {/* Organization Name */}
+        <div>
+          <label
+            htmlFor="orgName"
+            className="block text-sm font-thin text-gray-300 mb-1"
+          >
+            Organization Name
+          </label>
+          <div className="flex items-center w-full border border-white/10 rounded-none focus-within:ring-1 focus-within:ring-violet-400">
+            <span className="flex-shrink-0 px-6 py-4 text-sm text-gray-500 bg-white/5">
+              {SLUG_IRL}
+            </span>
+            <input
+              id="orgName"
+              type="text"
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="my-cool-org"
+              className="w-full px-6 py-4 bg-transparent border-none focus:outline-none text-sm text-violet-400"
+            />
+          </div>
+
+          {orgName && isAvailable === false && (
+            <p className="text-red-400 text-sm mt-1">
+              Organization name already taken.
+            </p>
+          )}
+          {orgName && isAvailable && (
+            <p className="text-green-400 text-sm mt-1">
+              Organization name is available.
+            </p>
+          )}
+          {isChecking && (
+            <p className="text-gray-400 text-sm mt-1">Checking availability...</p>
+          )}
+        </div>
+
+        {/* Description */}
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-thin text-gray-300 mb-1"
+          >
+            Description
+          </label>
+          <input
+            id="description"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter organization description"
+            className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none text-sm text-white"
+          />
+        </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={isButtonDisabled}
+          className={`group w-full px-12 py-4 text-blue-800 text-sm tracking-wider transition-all duration-300 ${
+            isButtonDisabled
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-purple-400 to-yellow-300"
+          }`}
+        >
+          {isCreating ? "Creating..." : "Create Organization"}
+          <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+        </button>
+      </form>
+    </div>
+  );
+};
   const navigate = useNavigate();
   const { data: user } = useGetMeQuery();
   const currentUserId = user?.id;
@@ -43,52 +125,48 @@ const CreateOrg = () => {
     setOrgSlug(slugify(orgName));
   }, [orgName]);
 
-  // Debounced check for organization availability
-  const checkAvailability = useCallback(
-    debounce(async (name) => {
-      if (!name) {
-        setIsAvailable(null);
-        return;
-      }
-      try {
-        const res = await checkNameAvailability(name).unwrap();
-        setIsAvailable(res?.available);
-      } catch {
-        setIsAvailable(null);
-      }
-    }, 500),
-    [checkNameAvailability]
-  );
-
+  // ✅ Debounced check for organization availability
   useEffect(() => {
-    checkAvailability(orgName);
-    return () => checkAvailability.cancel();
-  }, [orgName, checkAvailability]);
+    if (!orgName) {
+      setIsAvailable(null);
+      return;
+    }
 
-  const handleCreateOrg = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!orgName || !orgSlug || !isAvailable || !currentUserId) return;
-
-      const payload = {
-        name: orgName,
-        description,
-        slug: baseUrl,
-        owner_user_id: currentUserId,
-      };
-
+    const debouncedCheck = debounce(async () => {
       try {
-        await createOrganization(payload).unwrap();
-        setOrgName("");
-        setOrgSlug("");
-        setDescription("");
-        navigate(`/organizations/${orgName}`);
-      } catch {
-        // Error handled by form validation and UI feedback
+        const res = await checkNameAvailability(orgName).unwrap();
+        setIsAvailable(res?.available);
+      } catch (err) {
+        console.error("Error checking org name:", err);
+        setIsAvailable(null);
       }
-    },
-    [orgName, orgSlug, description, isAvailable, currentUserId, baseUrl, createOrganization, navigate]
-  );
+    }, 500);
+
+    debouncedCheck();
+    return () => debouncedCheck.cancel();
+  }, [orgName, checkNameAvailability]);
+
+  const handleCreateOrg = async (e) => {
+    e.preventDefault();
+    if (!orgName || !orgSlug || !isAvailable || !currentUserId) return;
+
+    const payload = {
+      name: orgName,
+      description,
+      slug: baseUrl,
+      owner_user_id: currentUserId,
+    };
+
+    try {
+      await createOrganization(payload).unwrap();
+      setOrgName("");
+      setOrgSlug("");
+      setDescription("");
+      navigate(`/organizations/${orgName}`);
+    } catch (error) {
+      console.error("Error creating organization:", error);
+    }
+  };
 
   const isButtonDisabled =
     !orgName ||
@@ -177,21 +255,269 @@ const CreateOrg = () => {
                   Description
                 </label>
                 <input
-                  id="description"
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter organization description"
-                  className={
-                    "w-full px-6 py-4 bg-transparent border border-white/10 " +
-                    "rounded-none focus:outline-none focus:ring-1 " +
-                    "focus:ring-violet-400 text-sm text-white"
-                  }
-                />
-              </div>
+import { useState, useEffect, useCallback, useMemo } from "react";
+   import { Building2, ArrowUpRight } from "lucide-react";
+   import { SLUG_IRL } from "../../util/constants";
+   import { useGetMeQuery } from "../../api/authApi.js";
+   import {
+     useCreateOrganizationMutation,
+     useLazyCheckOrganizationNameAvailabilityQuery,
+   } from "../../api/orgApi";
+   import { useNavigate } from "react-router-dom";
+   import debounce from "lodash.debounce";
 
-              {/* Submit */}
-              <button
+   // Safe logger to prevent PII/sensitive data leakage
+   const safeLogError = (context, error) => {
+     if (process.env.NODE_ENV === "development") {
+       console.warn(`[${context}] Error occurred:`, error?.message || error);
+     }
+   };
+
+   function slugify(text) {
+     if (!text) return "";
+     return text
+       .toString()
+       .toLowerCase()
+       .trim()
+       .replace(/\s+/g, "-")
+       .replace(/[^\w-]+/g, "")
+       .replace(/--+/g, "-")
+       .replace(/^-+/, "")
+       .replace(/-+$/, "");
+   }
+
+   // Custom Hook for Form Logic & State Management
+   const useOrganizationForm = () => {
+     const [orgName, setOrgName] = useState("");
+     const [orgSlug, setOrgSlug] = useState("");
+     const [description, setDescription] = useState("");
+     const [isAvailable, setIsAvailable] = useState(null);
+     const [isChecking, setIsChecking] = useState(false);
+
+     const navigate = useNavigate();
+     const { data: user } = useGetMeQuery();
+     const currentUserId = user?.id;
+
+     const [checkNameAvailability] = useLazyCheckOrganizationNameAvailabilityQuery();
+     const [createOrganization, { isLoading: isCreating }] = useCreateOrganizationMutation();
+
+     const baseUrl = useMemo(() => SLUG_IRL + orgSlug, [orgSlug]);
+
+     // Auto-generate slug when org name changes
+     useEffect(() => {
+       setOrgSlug(slugify(orgName));
+     }, [orgName]);
+
+     // Debounced check for organization availability
+     const debouncedCheck = useCallback(
+       debounce(async (name) => {
+         if (!name) {
+           setIsAvailable(null);
+           return;
+         }
+         setIsChecking(true);
+         try {
+           const res = await checkNameAvailability(name).unwrap();
+           setIsAvailable(res?.available);
+         } catch (err) {
+           safeLogError("CheckAvailability", err);
+           setIsAvailable(null);
+         } finally {
+           setIsChecking(false);
+         }
+       }, 500),
+       [checkNameAvailability]
+     );
+
+     useEffect(() => {
+       debouncedCheck(orgName);
+       return () => debouncedCheck.cancel();
+     }, [orgName, debouncedCheck]);
+
+     const handleCreateOrg = async (e) => {
+       e.preventDefault();
+       if (!orgName || !orgSlug || !isAvailable || !currentUserId) return;
+
+       const payload = {
+         name: orgName,
+         description,
+         slug: baseUrl,
+         owner_user_id: currentUserId,
+       };
+
+       try {
+         await createOrganization(payload).unwrap();
+         setOrgName("");
+         setOrgSlug("");
+         setDescription("");
+         setIsAvailable(null);
+         navigate(`/organizations/${encodeURIComponent(orgName)}`);
+       } catch (error) {
+         safeLogError("CreateOrganization", error);
+       }
+     };
+
+     const isButtonDisabled =
+       !orgName ||
+       !orgSlug ||
+       !description ||
+       isAvailable === false ||
+       isCreating ||
+       !currentUserId;
+
+     return {
+       orgName,
+       setOrgName,
+       orgSlug,
+       description,
+       setDescription,
+       isAvailable,
+       isChecking,
+       isCreating,
+       isButtonDisabled,
+       handleCreateOrg,
+       baseUrl,
+     };
+   };
+
+   // Form UI Component
+   const CreateOrgForm = () => {
+     const {
+       orgName,
+       setOrgName,
+       description,
+       setDescription,
+       isAvailable,
+       isChecking,
+       isCreating,
+       isButtonDisabled,
+       handleCreateOrg,
+     } = useOrganizationForm();
+
+     const descriptionClassName =
+       "w-full px-6 py-4 bg-transparent border border-white/10 rounded-none " +
+       "focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm text-white";
+
+     return (
+       <form onSubmit={handleCreateOrg} className="space-y-4">
+         {/* Organization Name */}
+         <div>
+           <label
+             htmlFor="orgName"
+             className="block text-sm font-thin text-gray-300 mb-1"
+           >
+             Organization Name
+           </label>
+           <div className="flex items-center w-full border border-white/10 rounded-none focus-within:ring-1 focus-within:ring-violet-400">
+             <span className="flex-shrink-0 px-6 py-4 text-sm text-gray-500 bg-white/5">
+               {SLUG_IRL}
+             </span>
+             <input
+               id="orgName"
+               type="text"
+               value={orgName}
+               onChange={(e) => setOrgName(e.target.value)}
+               placeholder="my-cool-org"
+               className="w-full px-6 py-4 bg-transparent border-none focus:outline-none text-sm text-violet-400"
+             />
+           </div>
+
+           {orgName && isAvailable === false && (
+             <p className="text-red-400 text-sm mt-1">
+               Organization name already taken.
+             </p>
+           )}
+           {orgName && isAvailable && (
+             <p className="text-green-400 text-sm mt-1">
+               Organization name is available.
+             </p>
+           )}
+           {isChecking && (
+             <p className="text-gray-400 text-sm mt-1">Checking availability...</p>
+           )}
+         </div>
+
+         {/* Description */}
+         <div>
+           <label
+             htmlFor="description"
+             className="block text-sm font-thin text-gray-300 mb-1"
+           >
+             Description
+           </label>
+           <input
+             id="description"
+             type="text"
+             value={description}
+             onChange={(e) => setDescription(e.target.value)}
+             placeholder="Enter organization description"
+             className={descriptionClassName}
+           />
+         </div>
+
+         {/* Submit */}
+         <button
+           type="submit"
+           disabled={isButtonDisabled}
+           className={`group w-full px-12 py-4 text-blue-800 text-sm tracking-wider transition-all duration-300 ${
+             isButtonDisabled
+               ? "bg-gray-500 cursor-not-allowed"
+               : "bg-gradient-to-r from-purple-400 to-yellow-300"
+           }`}
+         >
+           {isCreating ? "Creating..." : "Create Organization"}
+           <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+         </button>
+       </form>
+     );
+   };
+
+   // Main Component
+   const CreateOrg = () => {
+     return (
+       <div className="min-h-screen bg-[#0A0A0A] p-4 sm:p-6 lg:p-8">
+         <div className="max-w-6xl mx-auto space-y-8">
+           {/* Header */}
+           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+             <div>
+               <div className="flex items-center mb-10">
+                 <a href="/" rel="noopener noreferrer">
+                   <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
+                     PaperBrain<span className="text-violet-400">°</span>
+                   </span>
+                 </a>
+               </div>
+               <h1 className="text-3xl font-thin tracking-wide text-white">
+                 Create new Organization
+               </h1>
+               <p className="text-gray-400 mt-1 font-light">
+                 Create and manage your organization
+               </p>
+             </div>
+           </div>
+
+           {/* Form */}
+           <div className="flex items-center justify-center bg-[#0A0A0A] sm:p-6 lg:p-8">
+             <div className="w-full max-w-lg border border-white/10 backdrop-blur-md rounded-lg p-6 space-y-4">
+               <div className="space-y-1 text-center">
+                 <h2 className="text-violet-400 flex justify-center items-center gap-2 text-xl font-thin">
+                   <Building2 className="w-5 h-5" />
+                   Create Organization
+                 </h2>
+                 <p className="text-gray-400 text-sm font-light">
+                   Set up a new organization and start collaborating
+                 </p>
+               </div>
+
+               <CreateOrgForm />
+             </div>
+           </div>
+         </div>
+       </div>
+     );
+   };
+
+   export default CreateOrg;
                 type="submit"
                 disabled={isButtonDisabled}
                 className={`group w-full px-12 py-4 text-blue-800 text-sm tracking-wider transition-all duration-300 ${
@@ -212,4 +538,3 @@ const CreateOrg = () => {
 };
 
 export default CreateOrg;
->
