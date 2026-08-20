@@ -220,8 +220,7 @@ const OrgDashboard = () => {
 
 /**
  * Presentation component focused solely on UI composition.
- * Props are destructured directly in the function signature to avoid
- * duplicated internal destructuring logic.
+ * Receives a single props object containing all dashboard state.
  *
  * @param {object} props - Pre‑computed dashboard state.
  * @param {boolean} props.isOrgsError
@@ -235,45 +234,34 @@ const OrgDashboard = () => {
  * @param {function} props.setIsCreateOrgOpen
  * @param {object} props.selectedOrg
  */
-const OrgDashboardUI = ({
-  isOrgsError,
-  isMobileMenuOpen,
-  setIsMobileMenuOpen,
-  sidebarProps,
-  contentProps,
-  isSettingsOpen,
-  setIsSettingsOpen,
-  isCreateOrgOpen,
-  setIsCreateOrgOpen,
-  selectedOrg,
-}) => {
-  // Early return for error state
-  if (isOrgsError) {
+const OrgDashboardUI = (props) => {
+  // Render error state if organizations fail to load
+  if (props.isOrgsError) {
     return <OrganizationsError />;
   }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
       {/* Sidebar */}
-      <Sidebar {...sidebarProps} />
+      <Sidebar {...props.sidebarProps} />
 
       {/* Overlay (mobile) */}
-      <MobileOverlay isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <MobileOverlay isOpen={props.isMobileMenuOpen} onClose={() => props.setIsMobileMenuOpen(false)} />
 
       {/* Main content */}
-      <DashboardContent {...contentProps} />
+      <DashboardContent {...props.contentProps} />
 
       {/* Settings Modal */}
       <OrganizationSettingsModal
-        open={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        selectedOrg={selectedOrg}
+        open={props.isSettingsOpen}
+        onClose={() => props.setIsSettingsOpen(false)}
+        selectedOrg={props.selectedOrg}
       />
 
       {/* Create Organization Modal */}
       <CreateOrganizationModal
-        open={isCreateOrgOpen}
-        onClose={() => setIsCreateOrgOpen(false)}
+        open={props.isCreateOrgOpen}
+        onClose={() => props.setIsCreateOrgOpen(false)}
       />
     </div>
   );
