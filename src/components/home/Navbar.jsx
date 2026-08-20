@@ -70,17 +70,105 @@ const UserSection = ({ user, isDropdownOpen, setIsDropdownOpen }) => (
     <UserAvatar
       user={user}
       sizeClass="w-10 h-10 cursor-pointer"
-    />
-    {isDropdownOpen && <UserDropdown />}
-  </div>
-);
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
+  const { data: user, isSuccess } = useGetMeQuery();
+  const isAuthenticated = isSuccess && !!user;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleGetAccess = () => {
+    navigate("/login");
+  };
+
+  const handleMobileMenuClose = () => {
+    setIsMenuOpen(false);
+  };
+
+  const navClasses = scrolled
+    ? "bg-black/80 backdrop-blur-md"
+    : "bg-transparent";
+
+  return (
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${navClasses}`}>
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex justify-between h-24 items-center">
+          {/* Logo */}
+          <div className="flex items-center">
+            <a href="/">
+              <span className="text-2xl font-semibold tracking-widest bg-gradient-to-r from-purple-400 to-yellow-300 bg-clip-text text-transparent">
+                PaperBrain<span className="text-violet-400">°</span>
+              </span>
+            </a>
+          </div>
+
+          {/* Desktop Navigation & Auth Check */}
+          <div className="hidden md:flex items-center space-x-12">
+            {NAV_ITEMS.map((item) => (
+              <NavLink key={item} item={item} />
+            ))}
+
+            {isAuthenticated ? (
+              <UserSection
+                user={user}
+                isDropdownOpen={isDropdownOpen}
+                setIsDropdownOpen={setIsDropdownOpen}
+              />
+            ) : (
+              <GetAccessButton onClick={handleGetAccess} />
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? (
+                <X className="w-6 h-6 text-white" />
+              ) : (
+                <EllipsisVertical className="w-6 h-6 text-white" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Content */}
+      {isMenuOpen && (
+        <div className="md:hidden min-h-screen bg-black/80 backdrop-blur-md border-b border-white/5">
+          <div className="px-6 py-8 space-y-6">
+            {NAV_ITEMS.map((item) => (
+              <MobileNavLink
+                key={item}
+                item={item}
+                onClick={handleMobileMenuClose}
+              />
+            ))}
+            {!isAuthenticated && (
+              <GetAccessButton
+                onClick={() => {
+                  handleGetAccess();
+                  setIsMenuOpen(false);
+                }}
+                fullWidth
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
   const { data: user, isSuccess } = useGetMeQuery();
   const isAuthenticated = isSuccess && !!user;
 

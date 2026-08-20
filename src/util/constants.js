@@ -5,6 +5,8 @@
 // VITE_SLUG_URL=http://localhost:5173/organizations/
 // VITE_ORG_BASE_API_URL=http://localhost:8001/api/v1
 
+import { logger } from './logger';
+
 export const BASE_API_URL = (() => {
   const url = import.meta.env.VITE_BASE_API_URL;
   if (!url) {

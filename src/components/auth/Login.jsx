@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
 import { FaGithub, FaBitbucket, FaMicrosoft, FaGitlab } from "react-icons/fa";
 import axios from "axios";
+import logger from "../../utils/logger";
 
 const Login = () => {
   const [formData, setFormData] = useState({

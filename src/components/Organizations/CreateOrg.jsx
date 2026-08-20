@@ -17,17 +17,92 @@ function slugify(text) {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/[^\w-]+/g, "")
-    .replace(/--+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
-}
-
 const CreateOrg = () => {
-  const [orgName, setOrgName] = useState("");
-  const [orgSlug, setOrgSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [isAvailable, setIsAvailable] = useState(null);
+  const useOrganizationForm = () => {
+    const [orgName, setOrgName] = useState("");
+    const [orgSlug, setOrgSlug] = useState("");
+    const [description, setDescription] = useState("");
+    const [isAvailable, setIsAvailable] = useState(null);
+    const [isChecking, setIsChecking] = useState(false);
 
+    // ... (rest of the code)
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleCreateOrg} className="space-y-4">
+        {/* Organization Name */}
+        <div>
+          <label
+            htmlFor="orgName"
+            className="block text-sm font-thin text-gray-300 mb-1"
+          >
+            Organization Name
+          </label>
+          <div className="flex items-center w-full border border-white/10 rounded-none focus-within:ring-1 focus-within:ring-violet-400">
+            <span className="flex-shrink-0 px-6 py-4 text-sm text-gray-500 bg-white/5">
+              {SLUG_IRL}
+            </span>
+            <input
+              id="orgName"
+              type="text"
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="my-cool-org"
+              className="w-full px-6 py-4 bg-transparent border-none focus:outline-none text-sm text-violet-400"
+            />
+          </div>
+
+          {orgName && isAvailable === false && (
+            <p className="text-red-400 text-sm mt-1">
+              Organization name already taken.
+            </p>
+          )}
+          {orgName && isAvailable && (
+            <p className="text-green-400 text-sm mt-1">
+              Organization name is available.
+            </p>
+          )}
+          {isChecking && (
+            <p className="text-gray-400 text-sm mt-1">Checking availability...</p>
+          )}
+        </div>
+
+        {/* Description */}
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-thin text-gray-300 mb-1"
+          >
+            Description
+          </label>
+          <input
+            id="description"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter organization description"
+            className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none text-sm text-white"
+          />
+        </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={isButtonDisabled}
+          className={`group w-full px-12 py-4 text-blue-800 text-sm tracking-wider transition-all duration-300 ${
+            isButtonDisabled
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-purple-400 to-yellow-300"
+          }`}
+        >
+          {isCreating ? "Creating..." : "Create Organization"}
+          <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+        </button>
+      </form>
+    </div>
+  );
+};
   const navigate = useNavigate();
   const { data: user } = useGetMeQuery();
   const currentUserId = user?.id;
