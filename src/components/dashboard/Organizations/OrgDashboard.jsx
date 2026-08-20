@@ -204,84 +204,55 @@ const useOrgDashboard = () => {
     selectedOrg,
   };
 };
-  const {
-    data: organizations = [],
-    isLoading: isOrgsLoading,
-    isError: isOrgsError,
-  } = useGetOrganizationsByUserIdQuery(currentUserId, { skip: !currentUserId });
 
-  // 3. UI states
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [widgets, setWidgets] = useState(initialWidgets);
-  const [selectedOrg, setSelectedOrg] = useState(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isCreateOrgOpen, setIsCreateOrgOpen] = useState(false);
-
-  // 4. Automatically select the first organization once data is loaded
-  useEffect(() => {
-    if (!isOrgsLoading && organizations.length > 0 && !selectedOrg) {
-      setSelectedOrg(organizations[0]);
-    }
-  }, [organizations, isOrgsLoading, selectedOrg]);
-
-  // 5. Handle drag movement - wrapped in useCallback for stable reference
-  const handleMove = useCallback((fromId, toId) => {
-    setWidgets((current) => moveWidget(current, fromId, toId));
-  }, []);
-
-  // Memoize sidebar props to prevent unnecessary re-renders
-  const sidebarProps = useMemo(() => ({
-    organizations,
-    selectedOrg,
-    onSelectOrg: setSelectedOrg,
-    onCreateOrg: () => setIsCreateOrgOpen(true),
-    onOpenSettings: () => setIsSettingsOpen(true),
-    isMobileMenuOpen,
-    setIsMobileMenuOpen,
-  }), [organizations, selectedOrg, isMobileMenuOpen]);
-
-  // Memoize content props
-  const contentProps = useMemo(() => ({
-    user,
-    selectedOrg,
-    widgets,
-    onMove: handleMove,
-    isMobileMenuOpen,
-    onToggleSidebar: () => setIsMobileMenuOpen((prev) => !prev),
-  }), [user, selectedOrg, widgets, handleMove, isMobileMenuOpen]);
-
-  return {
-    isOrgsError,
-    isMobileMenuOpen,
-    setIsMobileMenuOpen,
-    sidebarProps,
-    contentProps,
-    isSettingsOpen,
-    setIsSettingsOpen,
-    isCreateOrgOpen,
-    setIsCreateOrgOpen,
-    selectedOrg,
-  };
-};
 
 /**
  * Thin wrapper component that delegates all logic to useOrgDashboard.
  * This keeps the render layer simple and focused solely on UI composition.
  */
+/**
+ * Container component that handles all data fetching and state orchestration.
+ * Delegates UI rendering to a pure presentation component, eliminating duplicated
+ * destructuring logic and adhering to the Single Responsibility Principle.
+ */
 const OrgDashboard = () => {
-  const {
-    isOrgsError,
-    isMobileMenuOpen,
-    setIsMobileMenuOpen,
-    sidebarProps,
-    contentProps,
-    isSettingsOpen,
-    setIsSettingsOpen,
-    isCreateOrgOpen,
-    setIsCreateOrgOpen,
-    selectedOrg,
-  } = useOrgDashboard();
+  const dashboardState = useOrgDashboard();
+  return <OrgDashboardUI {...dashboardState} />;
+};
 
+/**
+ * Presentation component focused solely on UI composition.
+ * Receives pre‑computed props, making it easy to test and reuse without side‑effects.
+ */
+/**
+ * Presentation component focused solely on UI composition.
+ * Props are destructured directly in the function signature to avoid
+ * duplicated internal destructuring logic.
+ *
+ * @param {object} props - Pre‑computed dashboard state.
+ * @param {boolean} props.isOrgsError
+ * @param {boolean} props.isMobileMenuOpen
+ * @param {function} props.setIsMobileMenuOpen
+ * @param {object} props.sidebarProps
+ * @param {object} props.contentProps
+ * @param {boolean} props.isSettingsOpen
+ * @param {function} props.setIsSettingsOpen
+ * @param {boolean} props.isCreateOrgOpen
+ * @param {function} props.setIsCreateOrgOpen
+ * @param {object} props.selectedOrg
+ */
+const OrgDashboardUI = ({
+  isOrgsError,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  sidebarProps,
+  contentProps,
+  isSettingsOpen,
+  setIsSettingsOpen,
+  isCreateOrgOpen,
+  setIsCreateOrgOpen,
+  selectedOrg,
+}) => {
   // Early return for error state
   if (isOrgsError) {
     return <OrganizationsError />;

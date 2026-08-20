@@ -1,42 +1,3 @@
-import React, { useState, useRef, useEffect } from "react";
-import { ArrowUpRight, Mail } from "lucide-react";
-
-const OTP_LENGTH = 6;
-
-const inputClassName = [
-  "w-12",
-  "h-12",
-  "text-center",
-  "bg-transparent",
-  "border",
-  "border-white/10",
-  "focus:border-violet-400",
-  "focus:ring-1",
-  "focus:ring-violet-400",
-  "text-lg",
-  "font-light",
-  "outline-none",
-  "transition-all"
-].join(" ");
-
-const buttonClassName = [
-  "group",
-  "w-full",
-  "relative",
-  "px-12",
-  "py-4",
-  "bg-gradient-to-r",
-  "from-purple-400",
-  "to-yellow-300",
-  "text-blue-800",
-  "text-sm",
-  "tracking-wider",
-  "transition-all",
-  "duration-300",
-  "disabled:opacity-50",
-  "disabled:cursor-not-allowed"
-].join(" ");
-
 /**
  * VerifyAccount component – refactored for maintainability.
  * Extracted pure functions and a dedicated OTPInput component.
@@ -269,39 +230,106 @@ const useOTPHandlers = (inputRefs, show) => {
   return { otp, handleChange, handleKeyDown, handlePaste };
 };
 
-/* ---------- Main Component ---------- */
-const VerifyAccount = () => {
+/* ---------- Verification Business Logic Hook ---------- */
+const useVerifyAccount = (show) => {
   const [loading, setLoading] = useState(false);
+
+  const runWithLoading = useCallback(
+    async (asyncFn, onSuccess, onError) => {
+      setLoading(true);
+      try {
+        await asyncFn();
+        return onSuccess();
+      } catch (error) {
+        return onError();
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setLoading]
+  );
+
+  const createHandler = useCallback((type, message, returnValue) => () => {
+    show(type, message);
+    return returnValue;
+  }, [show]);
+
+  const verify = useCallback(
+    async (otpCode) => {
+      return await runWithLoading(
+        async () => {
+          // TODO: Replace with actual API call
+          // await api.verifyEmail({ code: otpCode });
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        },
+        createHandler("success", "Verification successful!", true),
+        createHandler("error", "Verification failed. Please try again.", false)
+      );
+    },
+    [show, runWithLoading]
+  );
+
+  const resend = useCallback(
+    async () => {
+      await runWithLoading(
+        async () => {
+          // TODO: Replace with actual API call
+          // await api.resendVerificationCode();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        },
+        createHandler("success", "New verification code sent successfully."),
+        createHandler("error", "Failed to resend code. Please try again.")
+      );
+    },
+    [show, runWithLoading]
+  );
+
+  return { loading, verify, resend };
+};
+
+/* ---------- Form Component (Single Responsibility: UI) ---------- */
+const VerifyAccountForm = memo(
+  ({ otp, isComplete, loading, onSubmit, onResend, handleChange, handleKeyDown, handlePaste, inputRefs }) => (
+    <form onSubmit={onSubmit} className="space-y-8" noValidate>
+      <OTPInputGroup
+        otp={otp}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        inputRefs={inputRefs}
+      />
+
+      <button
+        type="submit"
+        className={buttonClassName}
+        disabled={loading || !isComplete}
+      >
+        {loading ? "VERIFYING..." : "VERIFY EMAIL"}
+        <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+      </button>
+    </form>
+  )
+);
+
+VerifyAccountForm.displayName = "VerifyAccountForm";
+
+/* ---------- Main Component (Composition Root) ---------- */
+const VerifyAccount = () => {
   const { notification, show } = useNotification();
   const inputRefs = useRef([]);
-  const { otp, handleChange, handleKeyDown, handlePaste } = useOTPHandlers(
-    inputRefs,
-    show
-  );
+  const { otp, handleChange, handleKeyDown, handlePaste } = useOTPHandlers(inputRefs, show);
+  const { loading, verify, resend } = useVerifyAccount(show);
+
+  const isComplete = otp.every(isNumeric);
 
   const handleSubmit = useCallback(
     (e) => {
       e.preventDefault();
-      setLoading(true);
-      // Simulate async verification – replace with real API call.
-      setTimeout(() => {
-        setLoading(false);
-        show("success", "Verification successful!");
-      }, 2000);
+      const otpCode = otp.join("");
+      verify(otpCode);
     },
-    [show]
+    [otp, verify]
   );
-
-  const handleResend = useCallback(() => {
-    setLoading(true);
-    // Simulate async resend – replace with real API call.
-    setTimeout(() => {
-      setLoading(false);
-      show("success", "New verification code sent successfully.");
-    }, 1000);
-  }, [show]);
-
-  const isComplete = otp.every(isNumeric);
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center">
@@ -321,31 +349,21 @@ const VerifyAccount = () => {
           below.
         </div>
 
-        <NotificationBanner
-          type={notification.type}
-          message={notification.message}
+        <NotificationBanner type={notification.type} message={notification.message} />
+
+        <VerifyAccountForm
+          otp={otp}
+          isComplete={isComplete}
+          loading={loading}
+          onSubmit={handleSubmit}
+          onResend={resend}
+          handleChange={handleChange}
+          handleKeyDown={handleKeyDown}
+          handlePaste={handlePaste}
+          inputRefs={inputRefs}
         />
 
-        <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-          <OTPInputGroup
-            otp={otp}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            inputRefs={inputRefs}
-          />
-
-          <button
-            type="submit"
-            className={buttonClassName}
-            disabled={loading || !isComplete}
-          >
-            {loading ? "VERIFYING..." : "VERIFY EMAIL"}
-            <ArrowUpRight className="inline-block ml-2 w-4 h-4 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
-          </button>
-        </form>
-
-        <ResendSection onResend={handleResend} disabled={loading} />
+        <ResendSection onResend={resend} disabled={loading} />
       </div>
     </div>
   );

@@ -1,6 +1,43 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, ArrowUpRight, Mail, KeyRound, CheckCircle, AlertCircle } from "lucide-react";
 
+// Reusable GradientButton component to eliminate duplicate code
+const GradientButton = ({ type = "button", disabled, loading, children, loadingText }) = (
+  <button
+    type={type}
+    className="
+      group
+      w-full
+      relative
+      px-12
+      py-4
+      bg-gradient-to-r
+      from-purple-400
+      to-yellow-300
+      text-blue-800
+      text-sm
+      tracking-wider
+      transition-all
+      duration-300
+    "
+    disabled={disabled}
+  >
+    {loading ? loadingText : children}
+    <ArrowUpRight
+      className="
+        inline-block
+        ml-2
+        w-4
+        h-4
+        transition-transform
+        duration-300
+        group-hover:-translate-y-1
+        group-hover:translate-x-1
+      "
+    />
+  </button>
+);
+
 const LoginOTP = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -100,39 +137,9 @@ const LoginOTP = () => {
               <Mail className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
 
-            <button
-              type="submit"
-              className="
-                group
-                w-full
-                relative
-                px-12
-                py-4
-                bg-gradient-to-r
-                from-purple-400
-                to-yellow-300
-                text-blue-800
-                text-sm
-                tracking-wider
-                transition-all
-                duration-300
-              "
-              disabled={loading}
-            >
-              {loading ? "SENDING OTP..." : "SEND OTP"}
-              <ArrowUpRight
-                className="
-                  inline-block
-                  ml-2
-                  w-4
-                  h-4
-                  transition-transform
-                  duration-300
-                  group-hover:-translate-y-1
-                  group-hover:translate-x-1
-                "
-              />
-            </button>
+            <GradientButton type="submit" disabled={loading} loading={loading} loadingText="SENDING OTP...">
+              SEND OTP
+            </GradientButton>
 >
           </form>
         ) : (
@@ -171,39 +178,14 @@ const LoginOTP = () => {
               ))}
             </div>
 
-            <button
+            <GradientButton
               type="submit"
-              className="
-                group
-                w-full
-                relative
-                px-12
-                py-4
-                bg-gradient-to-r
-                from-purple-400
-                to-yellow-300
-                text-blue-800
-                text-sm
-                tracking-wider
-                transition-all
-                duration-300
-              "
               disabled={loading || otp.join("").length !== 6}
+              loading={loading}
+              loadingText="VERIFYING..."
             >
-              {loading ? "VERIFYING..." : "VERIFY & LOGIN"}
-              <ArrowUpRight
-                className="
-                  inline-block
-                  ml-2
-                  w-4
-                  h-4
-                  transition-transform
-                  duration-300
-                  group-hover:-translate-y-1
-                  group-hover:translate-x-1
-                "
-              />
-            </button>
+              VERIFY & LOGIN
+            </GradientButton>
 >
 
             <div className="text-center">

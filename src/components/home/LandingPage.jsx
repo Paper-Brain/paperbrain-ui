@@ -272,17 +272,56 @@ const CTAFooter = () => (
     <div className="max-w-3xl mx-auto px-6 text-center">
       <h2 className="text-4xl font-light tracking-tight mb-8">
         Ready to modernize your workflow?
-      </h2>
-      <p className="text-gray-400 mb-10 font-light text-lg">
-        Join 200,000+ developers shipping better code, faster.
-      </p>
-      <button
-        className="px-10 py-4 bg-gradient-to-r from-purple-400 to-yellow-300 text-black rounded-full text-sm font-semibold tracking-wide hover:scale-105 transition-transform inline-flex items-center gap-2"
-      >
-        Get Started Now
-        <ChevronRight className="w-4 h-4" />
-      </button>
-    </div>
+import { useState, useEffect } from "react";
+import { 
+  ChevronRight, 
+  Award, 
+  ArrowUpRight, 
+  FileCode, 
+  Zap, 
+  GitBranch  
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const useMousePosition = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+import { useState, useEffect } from "react";
+import { 
+  ChevronRight, 
+  Award, 
+  ArrowUpRight, 
+  FileCode, 
+  Zap, 
+  GitBranch  
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const useMousePosition = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  return mousePosition;
+};
   </div>
 );
 
