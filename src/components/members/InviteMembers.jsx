@@ -80,7 +80,10 @@ const EmailInput = memo(function EmailInput({ value, onChange, onSubmit, disable
         <button
           type="submit"
           disabled={disabled || !value}
-          className="px-4 py-4 sm:py-0 bg-gradient-to-r from-purple-400 to-yellow-300 text-blue-800 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+           className={`
+  px-4 py-4 sm:py-0 bg-gradient-to-r from-purple-400 to-yellow-300
+  text-blue-800 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed
+`}
         >
           Invite Member
         </button>

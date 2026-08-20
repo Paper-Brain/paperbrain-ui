@@ -14,6 +14,7 @@ import React, {
   forwardRef,
 } from "react";
 import { ArrowUpRight, Mail } from "lucide-react";
+import * as authService from '../../services/authService'; // Assuming a service layer for API calls
 
 const OTP_LENGTH = 6;
 
@@ -258,9 +259,7 @@ const useVerifyAccount = (show) => {
     async (otpCode) => {
       return await runWithLoading(
         async () => {
-          // TODO: Replace with actual API call
-          // await api.verifyEmail({ code: otpCode });
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await authService.verifyEmail({ code: otpCode });
         },
         createHandler("success", "Verification successful!", true),
         createHandler("error", "Verification failed. Please try again.", false)
@@ -273,9 +272,7 @@ const useVerifyAccount = (show) => {
     async () => {
       await runWithLoading(
         async () => {
-          // TODO: Replace with actual API call
-          // await api.resendVerificationCode();
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await authService.resendVerificationCode();
         },
         createHandler("success", "New verification code sent successfully."),
         createHandler("error", "Failed to resend code. Please try again.")

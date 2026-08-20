@@ -207,23 +207,17 @@ const useOrgDashboard = () => {
 
 
 /**
- * Thin wrapper component that delegates all logic to useOrgDashboard.
- * This keeps the render layer simple and focused solely on UI composition.
- */
-/**
- * Container component that handles all data fetching and state orchestration.
- * Delegates UI rendering to a pure presentation component, eliminating duplicated
- * destructuring logic and adhering to the Single Responsibility Principle.
+ * Smart container component that orchestrates data fetching and state management
+ * via the `useOrgDashboard` hook. It delegates UI rendering to the `OrgDashboardUI`
+ * presentation component, adhering to the Single Responsibility Principle and
+ * keeping the render layer focused solely on UI composition.
  */
 const OrgDashboard = () => {
   const dashboardState = useOrgDashboard();
   return <OrgDashboardUI {...dashboardState} />;
 };
 
-/**
- * Presentation component focused solely on UI composition.
- * Receives pre‑computed props, making it easy to test and reuse without side‑effects.
- */
+
 /**
  * Presentation component focused solely on UI composition.
  * Props are destructured directly in the function signature to avoid
