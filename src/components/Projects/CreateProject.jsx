@@ -148,42 +148,69 @@ const CreateProject = () => {
     }));
   };
 
+  const getCsrfToken = () => {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "";
+  };
+
+  const validateForm = (data) => {
+    if (!data.projectName.trim()) {
+      return { valid: false, message: "Project name is required." };
+    }
+    return { valid: true };
+  };
+
+  const buildRequestPayload = (data) => ({
+    name: data.projectName.trim(),
+    description: data.description.trim(),
+    visibility: data.visibility,
+  });
+
+  const submitProject = async (payload) => {
+    const response = await fetch("/api/projects", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": getCsrfToken(),
+      },
+      body: JSON.stringify(payload),
+      credentials: "same-origin",
+    });
+    return response;
+  };
+
+  const handleApiResponse = async (response) => {
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const message = errorData.message || "Failed to create project.";
+      return { success: false, error: message };
+    }
+    const result = await response.json();
+    return { success: true, data: result };
+  };
+
+  const redirectToProject = (projectId) => {
+    window.location.href = `/projects/${encodeURIComponent(projectId)}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic client‑side validation
-    if (!formData.projectName.trim()) {
-      alert("Project name is required.");
+    const validation = validateForm(formData);
+    if (!validation.valid) {
+      alert(validation.message);
       return;
     }
 
     try {
-      const response = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token":
-            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ||
-            "",
-        },
-        body: JSON.stringify({
-          name: formData.projectName.trim(),
-          description: formData.description.trim(),
-          visibility: formData.visibility,
-        }),
-        credentials: "same-origin",
-      });
+      const response = await submitProject(buildRequestPayload(formData));
+      const result = await handleApiResponse(response);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const message = errorData.message || "Failed to create project.";
-        alert(message);
+      if (!result.success) {
+        alert(result.error);
         return;
       }
 
-      const result = await response.json();
-      // Redirect to the newly created project's page
-      window.location.href = `/projects/${encodeURIComponent(result.id)}`;
+      redirectToProject(result.data.id);
     } catch (err) {
       alert("An unexpected error occurred. Please try again later.");
     }
@@ -210,7 +237,6 @@ const CreateProject = () => {
             onChange={handleChange}
           />
           <InfoMessage />
-          {/* Advanced Toggle */}
           <CreateProjectButton />
         </form>
       </div>
