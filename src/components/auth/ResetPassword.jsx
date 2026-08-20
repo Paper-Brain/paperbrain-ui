@@ -1,12 +1,46 @@
-import React, { useState } from "react";
-import { ArrowLeft, ArrowUpRight, Lock, Eye, EyeOff } from "lucide-react";
+import { useState, useCallback } from 'react';
 
-const ResetPassword = () => {
-  const [formData, setFormData] = useState({
-    password: "",
-    confirmPassword: "",
-  });
+export const usePasswordReset = () => {
+  const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState('');
 
+  const updateField = useCallback((name, value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const validate = useCallback(() => {
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return false;
+    }
+    setError('');
+    return true;
+  }, [formData]);
+
+  const handleSubmit = useCallback(async (e) => {
+    e?.preventDefault?.();
+    if (!validate()) return;
+    
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSuccessMessage('Password reset successful');
+    } catch (err) {
+      setError('Failed to reset password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [validate]);
+
+  return { formData, updateField, loading, successMessage, error, handleSubmit };
+};
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);

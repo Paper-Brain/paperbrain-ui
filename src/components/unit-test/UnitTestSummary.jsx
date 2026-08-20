@@ -79,7 +79,7 @@ function DownloadButton() {
       URL.revokeObjectURL(url);
     } catch (error) {
       // Log the error without leaking sensitive information.
-      console.error("Error downloading test results:", error);
+      logger.error("Error downloading test results");
     }
   };
 

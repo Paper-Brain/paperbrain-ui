@@ -34,7 +34,7 @@ const Register = () => {
       // For now, we navigate directly; integrate a toast library like react-hot-toast
       navigate("/verify-account");
     } catch (error) {
-      console.error("Registration failed:", error);
+      safeLogError("Registration failed", error);
     } finally {
       setLoading(false);
     }

@@ -177,7 +177,6 @@ const CreateProject = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const message = errorData.message || "Failed to create project.";
-        console.error("Project creation error:", message);
         alert(message);
         return;
       }
@@ -186,7 +185,6 @@ const CreateProject = () => {
       // Redirect to the newly created project's page
       window.location.href = `/projects/${encodeURIComponent(result.id)}`;
     } catch (err) {
-      console.error("Network error while creating project:", err);
       alert("An unexpected error occurred. Please try again later.");
     }
   };

@@ -40,28 +40,41 @@ const ToggleSwitch = ({ name, checked, onChange, label, description, icon: Icon 
   </div>
 );
 
-const InputField = ({ label, name, type, value, onChange, placeholder, icon: Icon, showToggle, onToggle, showValue }) => (
-  <div className="relative">
-    <label className="block text-sm text-gray-400 mb-2">{label}</label>
+import PasswordToggle from "./PasswordToggleButton";
+
+const InputField = ({
+  label,
+  name,
+  type,
+  value,
+  onChange,
+  placeholder,
+  icon: Icon,
+  showToggle,
+  onToggle,
+  showValue,
+}) => {
+  return (
     <div className="relative">
-      <input
-        type={showToggle && showValue ? "text" : type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
-      />
-      {showToggle ? (
-        <button
-          type="button"
-          onClick={onToggle}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-        >
-          {showValue ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
-      ) : (
-        <Icon className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <label className="block text-sm text-gray-400 mb-2">{label}</label>
+      <div className="relative">
+        <input
+          type={showToggle && showValue ? "text" : type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-none focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm"
+        />
+        {showToggle ? (
+          <PasswordToggle showValue={showValue} onToggle={onToggle} />
+        ) : (
+          <Icon className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        )}
+      </div>
+    </div>
+  );
+};
 const useAccountSettingsForm = () => {
   const [settings, setSettings] = useState({
     fullName: "",

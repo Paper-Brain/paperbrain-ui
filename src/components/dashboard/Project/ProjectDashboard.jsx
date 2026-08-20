@@ -92,7 +92,20 @@ import { useState, useEffect, useCallback } from "react";
    );
 
    const TopNav = ({ isMobileMenuOpen, onToggleMobileMenu, isDropdownOpen, onToggleDropdown, user }) => {
-     const searchInputClass = `w-full pl-10 pr-4 py-1.5 bg-transparent border border-white/10 focus:outline-none focus:ring-1 focus:ring-violet-400 text-sm rounded-lg`;
+     const searchInputClass = [
+        'w-full',
+        'pl-10',
+        'pr-4',
+        'py-1.5',
+        'bg-transparent',
+        'border',
+        'border-white/10',
+        'focus:outline-none',
+        'focus:ring-1',
+        'focus:ring-violet-400',
+        'text-sm',
+        'rounded-lg',
+      ].join(' ');
 
      return (
        <header className="border-b border-white/10 p-4" role="banner">
