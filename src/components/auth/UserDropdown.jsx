@@ -45,7 +45,7 @@ const useHandleLogout = () => {
       await logout().unwrap();
     } catch (error) {
       // Log the error without exposing sensitive details.
-      console.error("Logout failed:", error);
+      logger.error("Logout failed:", error);
     } finally {
       // Use replace to avoid adding an entry to the browser history.
       window.location.replace("/login");
