@@ -37,7 +37,7 @@ const Login = () => {
         // Call the backend to generate oauth_state and get authorization URL
         const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
         if (!apiBaseUrl) {
-          console.error("CRITICAL: VITE_API_BASE_URL is not defined. Please configure your environment variables.");
+          logger.error("CRITICAL: VITE_API_BASE_URL is not defined. Please configure your environment variables.");
           setErrorMessage("Application configuration error. Please try again later.");
           setTimeout(() => setErrorMessage(null), 5000);
           return; // Stop execution if critical configuration is missing
