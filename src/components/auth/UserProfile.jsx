@@ -66,31 +66,34 @@ const ProfileView = memo(function ProfileView({ profile, onEdit }) {
 /* -------------------- Reusable Form Elements -------------------- */
 
 /**
- * Generic input field component – single responsibility, memoized,
- * and fully typed for future TypeScript migration.
- * Handles text, email and other simple inputs.
+ * Unified form field component – renders either <input> or <textarea>
+ * based on the `as` prop. Eliminates structural duplication between
+ * InputField and TextAreaField.
  */
-const InputField = memo(function InputField({
+const FormField = memo(function FormField({
   id,
   name,
+  as = "input",
   type = "text",
   value,
   placeholder,
   autoComplete,
   required = false,
+  rows,
   onChange,
 }) {
+  const isTextarea = as === "textarea";
+  const Element = isTextarea ? "textarea" : "input";
+
   return (
     <div className="relative">
       <label htmlFor={id} className="sr-only">
         {placeholder}
       </label>
-      <input
-        type={type}
+      <Element
+        {...(isTextarea ? { rows } : { type, autoComplete, required })}
         id={id}
         name={name}
-        required={required}
-        autoComplete={autoComplete}
         className={INPUT_CLASS}
         onChange={onChange}
         value={value}
@@ -100,33 +103,14 @@ const InputField = memo(function InputField({
   );
 });
 
-/**
- * Textarea component – isolated for readability and future extensions.
- */
-const TextAreaField = memo(function TextAreaField({
-  id,
-  name,
-  rows = 3,
-  value,
-  placeholder,
-  onChange,
-}) {
-  return (
-    <div className="relative">
-      <label htmlFor={id} className="sr-only">
-        {placeholder}
-      </label>
-      <textarea
-        id={id}
-        name={name}
-        rows={rows}
-        className={INPUT_CLASS}
-        onChange={onChange}
-        value={value}
-        placeholder={placeholder}
-      />
-    </div>
-  );
+/** Thin wrapper for semantic clarity – renders an <input> */
+const InputField = memo(function InputField(props) {
+  return <FormField as="input" {...props} />;
+});
+
+/** Thin wrapper for semantic clarity – renders a <textarea> */
+const TextAreaField = memo(function TextAreaField(props) {
+  return <FormField as="textarea" {...props} />;
 });
 
 /**
