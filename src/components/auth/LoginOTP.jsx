@@ -9,6 +9,11 @@ const LoginOTP = () => {
   const [toast, setToast] = useState(null);
   const inputRefs = useRef([]);
 
+  const primaryButtonClassName =
+    "group w-full relative px-12 py-4 bg-gradient-to-r " +
+    "from-purple-400 to-yellow-300 text-blue-800 " +
+    "text-sm tracking-wider transition-all duration-300";
+
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -100,11 +105,7 @@ const LoginOTP = () => {
 
             <button
               type="submit"
-              className={
-                "group w-full relative px-12 py-4 bg-gradient-to-r " +
-                "from-purple-400 to-yellow-300 text-blue-800 " +
-                "text-sm tracking-wider transition-all duration-300"
-              }
+              className={primaryButtonClassName}
               disabled={loading}
             >
               {loading ? "SENDING OTP..." : "SEND OTP"}
@@ -138,11 +139,7 @@ const LoginOTP = () => {
 
             <button
               type="submit"
-              className={
-                "group w-full relative px-12 py-4 bg-gradient-to-r " +
-                "from-purple-400 to-yellow-300 text-blue-800 " +
-                "text-sm tracking-wider transition-all duration-300"
-              }
+              className={primaryButtonClassName}
               disabled={loading || otp.join("").length !== 6}
             >
               {loading ? "VERIFYING..." : "VERIFY & LOGIN"}
