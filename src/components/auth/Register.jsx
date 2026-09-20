@@ -4,10 +4,8 @@ import { useNavigate, Link } from "react-router-dom";
 
 // Safe logger to prevent PII/secret leakage
 const safeLogError = (message, error) => {
-  // In production, integrate with a proper logging service (e.g., Sentry, LogRocket)
-  // Sanitize error to avoid leaking sensitive data
   const sanitizedError = error instanceof Error ? error.message : String(error);
-  // Logging disabled in production - replace with proper logger
+  // Production logger implementation here
 };
 
 const TextInput = ({ name, value, onChange, placeholder, type = "text", required = true }) => (
@@ -61,12 +59,12 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
+  // Optimized: Dependency array empty ([]) kar diya gaya hai
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error on change
-    if (error) setError("");
-  }, [error]);
+    setError((prevError) => (prevError ? "" : prevError));
+  }, []);
 
   const validateForm = () => {
     const { fullName, email, password, confirmPassword } = formData;
