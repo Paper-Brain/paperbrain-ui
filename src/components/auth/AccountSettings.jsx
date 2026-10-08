@@ -136,33 +136,9 @@ const useAccountSettingsForm = () => {
     setShowPassword,
   };
 };
-    twoFactor: false,
-  });
 
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState(null);
-
-  const handleInputChange = useCallback((e) => {
-    const value =
-      e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    setSettings((prev) => ({ ...prev, [e.target.name]: value }));
-  }, []);
-
-  const handleSubmit = useCallback(
-    (e) => {
-      e.preventDefault();
-      setLoading(true);
-      setMessage(null);
-
-      // Simulate saving settings
-      setTimeout(() => {
-        setLoading(false);
-        setMessage({ type: "success", text: "Settings updated successfully" });
-      }, 2000);
-    },
-    []
-  );
+const AccountSettings = () => {
+  const { settings, loading, showPassword, message, handleInputChange, handleSubmit, setShowPassword } = useAccountSettingsForm();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center items-center">
