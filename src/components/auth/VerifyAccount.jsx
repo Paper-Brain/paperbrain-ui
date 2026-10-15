@@ -52,7 +52,6 @@ import React, {
   memo,
   forwardRef,
 } from "react";
-import { ArrowUpRight, Mail } from "lucide-react";
 
 const OTP_LENGTH = 6;
 
